@@ -1,0 +1,42 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.CompleteEmployerProfileViewModel
+
+@{
+    ViewData["Title"] = "Complete Your Employer Profile";
+}
+
+<h2>Complete Your Employer Profile</h2>
+<p>Before you can post jobs, tell us about your company.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="CompleteProfile" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CompanyName" class="form-label"></label>
+                <input asp-for="CompanyName" class="form-control" />
+                <span asp-validation-for="CompanyName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Website" class="form-label"></label>
+                <input asp-for="Website" class="form-control" />
+                <span asp-validation-for="Website" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="JobTitle" class="form-label"></label>
+                <input asp-for="JobTitle" class="form-control" />
+                <span asp-validation-for="JobTitle" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save and Continue</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -36,7 +36,6 @@ namespace AI_powerd_job_search_management_system.Controllers
                 return View(model);
             }
 
-            // Extra safety: only ever allow these two roles to be self-registered
             if (model.Role != "Employer" && model.Role != "JobSeeker")
             {
                 ModelState.AddModelError("", "Invalid role selected.");
@@ -61,7 +60,6 @@ namespace AI_powerd_job_search_management_system.Controllers
                 return View(model);
             }
 
-            // Make sure the role exists in the database before assigning it
             if (!await _roleManager.RoleExistsAsync(model.Role))
             {
                 await _roleManager.CreateAsync(new IdentityRole(model.Role));
@@ -94,6 +92,16 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             if (result.Succeeded)
             {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                var roles = await _userManager.GetRolesAsync(user!);
+
+                if (roles.Contains("Admin"))
+                    return RedirectToAction("Index", "Admin");
+                if (roles.Contains("Employer"))
+                    return RedirectToAction("Index", "Employer");
+                if (roles.Contains("JobSeeker"))
+                    return RedirectToAction("Index", "JobSeeker");
+
                 return RedirectToAction("Index", "Home");
             }
 
