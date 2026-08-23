@@ -1,5 +1,53 @@
-﻿@{
+﻿@model List<AI_powerd_job_search_management_system.Models.Job>
+
+@{
     ViewData["Title"] = "Employer Dashboard";
 }
+
 <h2>Employer Dashboard</h2>
-<p>Welcome. This is where job posting and applicant management will go.</p>
+
+<a asp-action="CreateJob" class="btn btn-primary mb-3">+ Post a New Job</a>
+
+@if (!Model.Any())
+{
+    <p>You haven't posted any jobs yet.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Posted</th>
+                <th>Applicants</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var job in Model)
+            {
+                <tr>
+                    <td>@job.Title</td>
+                    <td>@job.Location</td>
+                    <td>
+                        <span class="badge @(job.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "bg-success" : "bg-secondary")">
+                            @job.Status
+                        </span>
+                    </td>
+                    <td>@job.PostedAt.ToString("dd MMM yyyy")</td>
+                    <td>@job.Applications.Count</td>
+                    <td>
+                        <a asp-action="EditJob" asp-route-id="@job.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form asp-action="ToggleStatus" asp-route-id="@job.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                @(job.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "Close" : "Reopen")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

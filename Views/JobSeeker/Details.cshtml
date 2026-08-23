@@ -1,0 +1,26 @@
+﻿@model AI_powerd_job_search_management_system.Models.Job
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<h2>@Model.Title</h2>
+<h5 class="text-muted">@Model.Employer?.Company?.Name — @Model.Location</h5>
+
+<p><strong>Salary:</strong> @(Model.SalaryRange ?? "Not specified")</p>
+
+<h5>Description</h5>
+<p style="white-space: pre-wrap;">@Model.Description</p>
+
+@if (Model.JobSkills.Any())
+{
+    <h5>Required Skills</h5>
+    <ul>
+        @foreach (var js in Model.JobSkills)
+        {
+            <li>@js.Skill?.Name @(js.IsRequired ? "" : "(preferred)")</li>
+        }
+    </ul>
+}
+
+<a asp-action="Index" class="btn btn-link">← Back to jobs</a>

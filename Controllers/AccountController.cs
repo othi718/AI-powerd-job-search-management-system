@@ -69,6 +69,11 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             await _signInManager.SignInAsync(user, isPersistent: false);
 
+            if (model.Role == "Employer")
+                return RedirectToAction("Index", "Employer");
+            if (model.Role == "JobSeeker")
+                return RedirectToAction("Index", "JobSeeker");
+
             return RedirectToAction("Index", "Home");
         }
 

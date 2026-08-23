@@ -1,0 +1,44 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.JobViewModel
+
+@{
+    ViewData["Title"] = "Post a New Job";
+}
+
+<h2>Post a New Job</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="CreateJob" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Location" class="form-label"></label>
+                <input asp-for="Location" class="form-control" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SalaryRange" class="form-label"></label>
+                <input asp-for="SalaryRange" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Post Job</button>
+            <a asp-action="Index" class="btn btn-link">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

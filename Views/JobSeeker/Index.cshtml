@@ -1,5 +1,46 @@
-﻿@{
-    ViewData["Title"] = "Job Seeker Dashboard";
+﻿@model List<AI_powerd_job_search_management_system.Models.Job>
+
+@{
+    ViewData["Title"] = "Browse Jobs";
 }
-<h2>Job Seeker Dashboard</h2>
-<p>Welcome. This is where job search and applications will go.</p>
+
+<h2>Browse Jobs</h2>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Job title..." />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="location" value="@ViewBag.Location" class="form-control" placeholder="Location..." />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <p>No open jobs found.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var job in Model)
+        {
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@job.Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            @job.Employer?.Company?.Name — @job.Location
+                        </h6>
+                        <p class="card-text">
+                            @(job.Description.Length > 150 ? job.Description.Substring(0, 150) + "..." : job.Description)
+                        </p>
+                        <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
