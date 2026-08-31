@@ -4,48 +4,54 @@
     ViewData["Title"] = "Register";
 }
 
-<h2>Create an Account</h2>
-
-<div class="row">
-    <div class="col-md-6">
+<div class="auth-card">
+    <div class="auth-visual">
+        <h2>Find the right fit,<br />on either side of the table.</h2>
+        <p>Whether you're hiring or job hunting, SmartHire keeps everything — postings, applications, matches — in one clean place.</p>
+    </div>
+    <div class="auth-form-panel">
+        <h3 class="mb-4">Create an account</h3>
         <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <div class="form-group mb-3">
+            <div class="mb-3">
                 <label asp-for="FullName" class="form-label"></label>
                 <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+                <span asp-validation-for="FullName" class="text-danger small"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
                 <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="mb-3">
                 <label asp-for="ConfirmPassword" class="form-label"></label>
                 <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="mb-4">
                 <label asp-for="Role" class="form-label"></label>
                 <select asp-for="Role" class="form-select">
                     <option value="">-- Select --</option>
                     <option value="JobSeeker">Job Seeker</option>
                     <option value="Employer">Employer</option>
                 </select>
-                <span asp-validation-for="Role" class="text-danger"></span>
+                <span asp-validation-for="Role" class="text-danger small"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-pill btn-ink w-100">Create account</button>
+            <p class="text-center small text-muted mt-3 mb-0">
+                Already have an account? <a asp-action="Login">Sign in</a>
+            </p>
         </form>
     </div>
 </div>

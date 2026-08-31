@@ -1,26 +1,38 @@
 ﻿@model AI_powerd_job_search_management_system.Models.Job
-
 @{
     ViewData["Title"] = Model.Title;
 }
-
-<h2>@Model.Title</h2>
-<h5 class="text-muted">@Model.Employer?.Company?.Name — @Model.Location</h5>
-
-<p><strong>Salary:</strong> @(Model.SalaryRange ?? "Not specified")</p>
-
-<h5>Description</h5>
-<p style="white-space: pre-wrap;">@Model.Description</p>
-
-@if (Model.JobSkills.Any())
-{
-    <h5>Required Skills</h5>
-    <ul>
-        @foreach (var js in Model.JobSkills)
-        {
-            <li>@js.Skill?.Name @(js.IsRequired ? "" : "(preferred)")</li>
-        }
-    </ul>
-}
-
-<a asp-action="Index" class="btn btn-link">← Back to jobs</a>
+<a asp-action="Index" class="btn btn-ghost mb-3">&larr; Back to jobs</a>
+<div class="card-clean" style="max-width: 720px;">
+    <div class="d-flex gap-3 align-items-start mb-4">
+        <div class="job-company-badge" style="width:52px;height:52px;font-size:1.25rem;">
+            @(Model.Employer?.Company?.Name?.Substring(0, 1) ?? "?")
+        </div>
+        <div>
+            <h2 class="mb-1">@Model.Title</h2>
+            <p class="job-meta mb-0">@Model.Employer?.Company?.Name &middot; @Model.Location</p>
+        </div>
+    </div>
+    <p><strong>Salary:</strong> @(Model.SalaryRange ?? "Not specified")</p>
+    <h5 class="mt-4">Description</h5>
+    <p style="white-space: pre-wrap;" class="text-muted">@Model.Description</p>
+    @if (Model.JobSkills.Any())
+    {
+        <h5 class="mt-4">Required skills</h5>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var js in Model.JobSkills)
+            {
+                <span class="badge-pill badge-open">@js.Skill?.Name @(js.IsRequired ? "" : "(preferred)")</span>
+            }
+        </div>
+    }
+    <hr />
+    @if (ViewBag.AlreadyApplied == true)
+    {
+        <span class="badge-pill badge-open">Already applied</span>
+    }
+    else
+    {
+        <a asp-action="Apply" asp-route-jobId="@Model.Id" class="btn btn-pill btn-ink">Apply now</a>
+    }
+</div>

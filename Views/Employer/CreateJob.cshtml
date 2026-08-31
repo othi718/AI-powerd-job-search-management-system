@@ -4,41 +4,58 @@
     ViewData["Title"] = "Post a New Job";
 }
 
-<h2>Post a New Job</h2>
+<div class="page-header">
+    <h2>Post a new job</h2>
+    <p>This will appear immediately in job seekers' search results.</p>
+</div>
 
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="CreateJob" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="card-clean" style="max-width: 640px;">
+    <form asp-action="CreateJob" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Title" class="form-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
+        </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="form-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Description" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="RequiredSkills" class="form-label"></label>
 
-            <div class="form-group mb-3">
-                <label asp-for="Location" class="form-label"></label>
-                <input asp-for="Location" class="form-control" />
-            </div>
+            <input asp-for="RequiredSkills"
+                   class="form-control"
+                   placeholder="C#, ASP.NET Core, SQL Server, Entity Framework" />
 
-            <div class="form-group mb-3">
-                <label asp-for="SalaryRange" class="form-label"></label>
-                <input asp-for="SalaryRange" class="form-control" />
-            </div>
+            <small class="text-muted">
+                Enter skills separated by commas.
+            </small>
 
-            <button type="submit" class="btn btn-primary">Post Job</button>
-            <a asp-action="Index" class="btn btn-link">Cancel</a>
-        </form>
-    </div>
+            <span asp-validation-for="RequiredSkills"
+                  class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control" />
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="SalaryRange" class="form-label"></label>
+            <input asp-for="SalaryRange" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-pill btn-ink">Post job</button>
+        <a asp-action="Index" class="btn btn-ghost">Cancel</a>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

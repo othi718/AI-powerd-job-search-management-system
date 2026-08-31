@@ -29,6 +29,7 @@ namespace AI_powerd_job_search_management_system.Data
         public DbSet<SavedJob> SavedJobs { get; set; }
         public DbSet<Interview> Interviews { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<JobSeekerSkill> JobSeekerSkills { get; set; }
 
 
 

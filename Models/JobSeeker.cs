@@ -20,5 +20,7 @@ namespace AI_powerd_job_search_management_system.Models
         public ICollection<Resume> Resumes { get; set; } = new List<Resume>();
         public ICollection<JobApplication> Applications { get; set; } = new List<JobApplication>();
         public ICollection<SavedJob> SavedJobs { get; set; } = new List<SavedJob>();
+        public ICollection<JobSeekerSkill> Skills { get; set; }
+    = new List<JobSeekerSkill>();
     }
 }

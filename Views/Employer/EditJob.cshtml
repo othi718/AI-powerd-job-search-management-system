@@ -33,6 +33,10 @@
                 <label asp-for="SalaryRange" class="form-label"></label>
                 <input asp-for="SalaryRange" class="form-control" />
             </div>
+            <div class="mb-4">
+                <label asp-for="RequiredSkills" class="form-label">Required skills (comma-separated)</label>
+                <input asp-for="RequiredSkills" class="form-control" placeholder="e.g. C#, SQL Server, Communication" />
+            </div>
 
             <button type="submit" class="btn btn-primary">Save Changes</button>
             <a asp-action="Index" class="btn btn-link">Cancel</a>

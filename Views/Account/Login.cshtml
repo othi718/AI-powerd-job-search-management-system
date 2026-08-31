@@ -4,31 +4,37 @@
     ViewData["Title"] = "Login";
 }
 
-<h2>Login</h2>
-
-<div class="row">
-    <div class="col-md-6">
+<div class="auth-card">
+    <div class="auth-visual">
+        <h2>Welcome back to <br />your job search.</h2>
+        <p>Log in to track applications, manage postings, and pick up right where you left off.</p>
+    </div>
+    <div class="auth-form-panel">
+        <h3 class="mb-4">Sign in</h3>
         <form asp-action="Login" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <div class="form-group mb-3">
+            <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
                 <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
-            <div class="form-check mb-3">
+            <div class="form-check mb-4">
                 <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label"></label>
+                <label asp-for="RememberMe" class="form-check-label small"></label>
             </div>
 
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-pill btn-ink w-100">Sign in</button>
+            <p class="text-center small text-muted mt-3 mb-0">
+                New here? <a asp-action="Register">Create an account</a>
+            </p>
         </form>
     </div>
 </div>

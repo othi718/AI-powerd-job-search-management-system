@@ -1,0 +1,24 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.CompleteJobSeekerProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="page-header">
+    <h2>Edit profile</h2>
+</div>
+
+<div class="card-clean" style="max-width: 560px;">
+    <form asp-action="EditProfile" method="post">
+        <div class="mb-3">
+            <label asp-for="Bio" class="form-label"></label>
+            <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+        </div>
+        <div class="mb-4">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-pill btn-ink">Save changes</button>
+        <a asp-action="Profile" class="btn btn-ghost">Cancel</a>
+    </form>
+</div>

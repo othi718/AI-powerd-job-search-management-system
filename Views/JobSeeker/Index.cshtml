@@ -4,40 +4,38 @@
     ViewData["Title"] = "Browse Jobs";
 }
 
-<h2>Browse Jobs</h2>
+<div class="page-header">
+    <h2>Find your next role</h2>
+    <p>@Model.Count() open positions right now</p>
+</div>
 
-<form method="get" class="row g-2 mb-4">
-    <div class="col-auto">
-        <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Job title..." />
-    </div>
-    <div class="col-auto">
-        <input type="text" name="location" value="@ViewBag.Location" class="form-control" placeholder="Location..." />
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Search</button>
-    </div>
+<form method="get" class="card-clean d-flex flex-wrap gap-2 mb-4">
+    <input type="text" name="search" value="@ViewBag.Search" class="form-control" style="max-width: 260px;" placeholder="Job title..." />
+    <input type="text" name="location" value="@ViewBag.Location" class="form-control" style="max-width: 220px;" placeholder="Location..." />
+    <button type="submit" class="btn btn-pill btn-ink">Search</button>
 </form>
 
 @if (!Model.Any())
 {
-    <p>No open jobs found.</p>
+    <div class="card-clean text-center py-5">
+        <p class="mb-0 text-muted">No open jobs found.</p>
+    </div>
 }
 else
 {
-    <div class="row">
+    <div class="row g-3">
         @foreach (var job in Model)
         {
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@job.Title</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            @job.Employer?.Company?.Name — @job.Location
-                        </h6>
-                        <p class="card-text">
-                            @(job.Description.Length > 150 ? job.Description.Substring(0, 150) + "..." : job.Description)
+            <div class="col-md-6">
+                <div class="card-clean card-hover job-card h-100 d-flex flex-row gap-3">
+                    <div class="job-company-badge">@(job.Employer?.Company?.Name?.Substring(0, 1) ?? "?")</div>
+                    <div class="flex-grow-1">
+                        <h5>@job.Title</h5>
+                        <p class="job-meta mb-2">@job.Employer?.Company?.Name &middot; @job.Location</p>
+                        <p class="small text-muted mb-3">
+                            @(job.Description.Length > 110 ? job.Description.Substring(0, 110) + "..." : job.Description)
                         </p>
-                        <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-primary">View Details</a>
+                        <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-pill btn-mint-outline btn-sm">View details</a>
                     </div>
                 </div>
             </div>

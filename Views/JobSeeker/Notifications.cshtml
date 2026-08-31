@@ -1,0 +1,51 @@
+﻿@model IEnumerable<AI_powerd_job_search_management_system.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="page-header">
+    <h2>Notifications</h2>
+    <p>Job opportunities matched with your skills.</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-clean text-center py-5">
+
+        <h5>No notifications yet</h5>
+
+        <p class="text-muted">
+            When a new job matches your skills,
+            you'll see a notification here.
+        </p>
+
+    </div>
+}
+else
+{
+    foreach (var notification in Model)
+    {
+        <div class="card-clean mb-3">
+
+            <div class="d-flex justify-content-between">
+
+                <div>
+                    <h5>
+                        🔔 New Job Match
+                    </h5>
+
+                    <p class="mb-2">
+                        @notification.Message
+                    </p>
+                </div>
+
+                <small class="text-muted">
+                    @notification.CreatedAt.ToLocalTime().ToString("dd MMM yyyy hh:mm tt")
+                </small>
+
+            </div>
+
+        </div>
+    }
+}

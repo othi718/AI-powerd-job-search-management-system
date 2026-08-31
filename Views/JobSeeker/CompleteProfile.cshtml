@@ -1,0 +1,24 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.CompleteJobSeekerProfileViewModel
+
+@{
+    ViewData["Title"] = "Complete Your Profile";
+}
+
+<div class="page-header">
+    <h2>Tell us a bit about yourself</h2>
+    <p>This helps employers get to know you before they open your resume.</p>
+</div>
+
+<div class="card-clean" style="max-width: 560px;">
+    <form asp-action="CompleteProfile" method="post">
+        <div class="mb-3">
+            <label asp-for="Bio" class="form-label"></label>
+            <textarea asp-for="Bio" class="form-control" rows="4" placeholder="A short intro about your background..."></textarea>
+        </div>
+        <div class="mb-4">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control" placeholder="e.g. Dhaka, Bangladesh" />
+        </div>
+        <button type="submit" class="btn btn-pill btn-ink">Save and continue</button>
+    </form>
+</div>

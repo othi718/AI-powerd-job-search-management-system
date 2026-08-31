@@ -1,0 +1,99 @@
+﻿@model IEnumerable<AI_powerd_job_search_management_system.Models.JobSeekerSkill>
+
+@{
+    ViewData["Title"] = "My Skills";
+}
+
+<div class="page-header">
+    <h2>My Skills</h2>
+    <p>Add your skills so we can notify you about relevant jobs.</p>
+</div>
+
+<div class="card-clean mb-4" style="max-width: 640px;">
+
+    @if (TempData["SkillSuccess"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SkillSuccess"]
+        </div>
+    }
+
+    @if (TempData["SkillError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["SkillError"]
+        </div>
+    }
+
+    <form asp-action="AddSkill" method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label">
+                Add a skill
+            </label>
+
+            <div class="input-group">
+                <input type="text"
+                       name="skillName"
+                       class="form-control"
+                       placeholder="Example: C#" />
+
+                <button type="submit"
+                        class="btn btn-ink">
+                    Add Skill
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<div class="card-clean" style="max-width: 640px;">
+
+    <h4 class="mb-3">Your Skills</h4>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">
+            You haven't added any skills yet.
+        </p>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap gap-2">
+
+            @foreach (var item in Model)
+            {
+                <div class="border rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+
+                    <span>
+                        @item.Skill?.Name
+                    </span>
+
+                    <form asp-action="DeleteSkill"
+                          method="post"
+                          class="d-inline">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.Id" />
+
+                        <button type="submit"
+                                class="btn btn-sm text-danger p-0"
+                                title="Remove skill">
+                            ×
+                        </button>
+
+                    </form>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

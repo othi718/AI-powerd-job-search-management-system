@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Apply";
+    var job = (AI_powerd_job_search_management_system.Models.Job)ViewBag.Job;
+    var resumes = (List<AI_powerd_job_search_management_system.Models.Resume>)ViewBag.Resumes;
+}
+
+<div class="page-header">
+    <h2>Apply to @job.Title</h2>
+    <p>@job.Employer?.Company?.Name &middot; @job.Location</p>
+</div>
+
+<div class="card-clean" style="max-width: 520px;">
+    <form asp-action="Apply" method="post">
+        <input type="hidden" name="jobId" value="@job.Id" />
+        <div class="mb-4">
+            <label class="form-label">Choose a resume</label>
+            <select name="resumeId" class="form-select">
+                @foreach (var r in resumes)
+                {
+                    <option value="@r.Id">@r.OriginalFileName (uploaded @r.UploadedAt.ToString("dd MMM yyyy"))</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-pill btn-ink">Submit application</button>
+        <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-ghost">Cancel</a>
+    </form>
+</div>
