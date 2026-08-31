@@ -1,5 +1,40 @@
 ﻿@{
     ViewData["Title"] = "Admin Dashboard";
 }
-<h2>Admin Dashboard</h2>
-<p>Welcome, Admin. This is where user, company, and job management will go.</p>
+
+<div class="page-header">
+    <h2>Admin Dashboard</h2>
+    <p>System overview</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card-clean text-center">
+            <h3 class="mb-0">@ViewBag.TotalUsers</h3>
+            <p class="text-muted mb-0">Total users</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-clean text-center">
+            <h3 class="mb-0">@ViewBag.TotalJobs</h3>
+            <p class="text-muted mb-0">Total jobs</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-clean text-center">
+            <h3 class="mb-0">@ViewBag.PendingCompanies</h3>
+            <p class="text-muted mb-0">Pending approval</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-clean text-center">
+            <h3 class="mb-0">@ViewBag.TotalApplications</h3>
+            <p class="text-muted mb-0">Applications</p>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <a asp-action="Companies" class="btn btn-pill btn-ink">Manage companies</a>
+    <a asp-action="Users" class="btn btn-pill btn-mint-outline">Manage users</a>
+</div>

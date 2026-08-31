@@ -1,0 +1,57 @@
+﻿@model List<AI_powerd_job_search_management_system.Models.JobApplication>
+
+@{
+    ViewData["Title"] = "Applicants";
+    var job = (AI_powerd_job_search_management_system.Models.Job)ViewBag.Job;
+}
+
+<div class="page-header">
+    <h2>Applicants for @job.Title</h2>
+    <p>@Model.Count() applied</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-clean text-center py-5">
+        <p class="mb-0 text-muted">No applicants yet.</p>
+    </div>
+}
+else
+{
+    <div class="card-clean p-0">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th class="ps-4">Name</th>
+                    <th>Email</th>
+                    <th>Resume</th>
+                    <th>Applied</th>
+                    <th class="pe-4">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var app in Model)
+                {
+                    <tr>
+                        <td class="ps-4 fw-semibold">@app.JobSeeker?.ApplicationUser?.FullName</td>
+                        <td class="text-muted">@app.JobSeeker?.ApplicationUser?.Email</td>
+                        <td><a asp-controller="Files" asp-action="DownloadResume" asp-route-id="@app.ResumeId" class="btn btn-pill btn-mint-outline btn-sm">Download</a></td>
+                        <td class="text-muted">@app.AppliedAt.ToString("dd MMM yyyy")</td>
+                        <td class="pe-4">
+                            <form asp-action="UpdateApplicationStatus" method="post" class="d-flex gap-1">
+                                <input type="hidden" name="applicationId" value="@app.Id" />
+                                <select name="status" class="form-select form-select-sm" style="width:auto;">
+                                    @foreach (var s in Enum.GetValues(typeof(AI_powerd_job_search_management_system.Models.ApplicationStatus)))
+                                    {
+                                        <option value="@s" selected="@(s.Equals(app.Status))">@s</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-pill btn-ghost btn-sm">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

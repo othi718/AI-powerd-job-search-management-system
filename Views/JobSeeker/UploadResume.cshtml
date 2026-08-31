@@ -1,0 +1,25 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.ResumeUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload Resume";
+}
+
+<div class="page-header">
+    <h2>Upload a resume</h2>
+    <p>PDF or DOCX, up to 5MB.</p>
+</div>
+
+<div class="card-clean" style="max-width: 520px;">
+    <form asp-action="UploadResume" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+        <div class="mb-4">
+            <label asp-for="File" class="form-label"></label>
+            <input asp-for="File" type="file" class="form-control" accept=".pdf,.docx" />
+            <span asp-validation-for="File" class="text-danger small"></span>
+        </div>
+
+        <button type="submit" class="btn btn-pill btn-ink">Upload</button>
+        <a asp-action="MyResumes" class="btn btn-ghost">Cancel</a>
+    </form>
+</div>

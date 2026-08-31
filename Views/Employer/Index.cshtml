@@ -4,50 +4,59 @@
     ViewData["Title"] = "Employer Dashboard";
 }
 
-<h2>Employer Dashboard</h2>
-
-<a asp-action="CreateJob" class="btn btn-primary mb-3">+ Post a New Job</a>
+<div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div>
+        <h2>Your job postings</h2>
+        <p>@Model.Count() posted &middot; @Model.Count(j => j.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open) open</p>
+    </div>
+    <a asp-action="CreateJob" class="btn btn-pill btn-ink">+ Post a new job</a>
+</div>
 
 @if (!Model.Any())
 {
-    <p>You haven't posted any jobs yet.</p>
+    <div class="card-clean text-center py-5">
+        <p class="mb-0 text-muted">You haven't posted any jobs yet.</p>
+    </div>
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Posted</th>
-                <th>Applicants</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var job in Model)
-            {
-                <tr>
-                    <td>@job.Title</td>
-                    <td>@job.Location</td>
-                    <td>
-                        <span class="badge @(job.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "bg-success" : "bg-secondary")">
-                            @job.Status
-                        </span>
-                    </td>
-                    <td>@job.PostedAt.ToString("dd MMM yyyy")</td>
-                    <td>@job.Applications.Count</td>
-                    <td>
-                        <a asp-action="EditJob" asp-route-id="@job.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <form asp-action="ToggleStatus" asp-route-id="@job.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-warning">
-                                @(job.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "Close" : "Reopen")
-                            </button>
-                        </form>
-                    </td>
+    <div class="card-clean p-0">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th class="ps-4">Title</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Posted</th>
+                    <th>Applicants</th>
+                    <th class="pe-4">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var job in Model)
+                {
+                    <tr>
+                        <td class="ps-4 fw-semibold">@job.Title</td>
+                        <td class="text-muted">@job.Location</td>
+                        <td>
+                            <span class="badge-pill @(job.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "badge-open" : "badge-closed")">
+                                @job.Status
+                            </span>
+                        </td>
+                        <td class="text-muted">@job.PostedAt.ToString("dd MMM yyyy")</td>
+                        <td class="text-muted">@job.Applications.Count</td>
+                        <td class="pe-4">
+                            <a asp-action="EditJob" asp-route-id="@job.Id" class="btn btn-pill btn-mint-outline btn-sm">Edit</a>
+                            <a asp-action="Applicants" asp-route-jobId="@job.Id" class="btn btn-pill btn-ghost btn-sm">Applicants (@job.Applications.Count)</a>
+                            <form asp-action="ToggleStatus" asp-route-id="@job.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-pill btn-ghost btn-sm">
+                                    @(job.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "Close" : "Reopen")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }

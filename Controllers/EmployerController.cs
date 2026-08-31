@@ -161,5 +161,39 @@ namespace AI_powerd_job_search_management_system.Controllers
             var userId = _userManager.GetUserId(User);
             return await _context.Employers.FirstOrDefaultAsync(e => e.ApplicationUserId == userId);
         }
+        [HttpGet]
+        public async Task<IActionResult> Applicants(int jobId)
+        {
+            var employer = await GetCurrentEmployerAsync();
+            var job = await _context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == employer!.Id);
+            if (job == null) return NotFound();
+
+            var applications = await _context.JobApplications
+                .Include(a => a.JobSeeker)
+                    .ThenInclude(js => js!.ApplicationUser)
+                .Include(a => a.Resume)
+                .Where(a => a.JobId == jobId)
+                .OrderByDescending(a => a.AppliedAt)
+                .ToListAsync();
+
+            ViewBag.Job = job;
+            return View(applications);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateApplicationStatus(int applicationId, ApplicationStatus status)
+        {
+            var employer = await GetCurrentEmployerAsync();
+            var application = await _context.JobApplications
+                .Include(a => a.Job)
+                .FirstOrDefaultAsync(a => a.Id == applicationId && a.Job!.EmployerId == employer!.Id);
+            if (application == null) return NotFound();
+
+            application.Status = status;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Applicants", new { jobId = application.JobId });
+        }
     }
 }
