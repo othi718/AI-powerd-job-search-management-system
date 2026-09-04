@@ -1,0 +1,11 @@
+﻿@model int
+
+<a asp-controller="JobSeeker" asp-action="Notifications" class="position-relative d-inline-flex align-items-center me-2" title="Notifications">
+    <span style="font-size:1.25rem;">&#128276;</span>
+    @if (Model > 0)
+    {
+        <span class="position-absolute badge rounded-pill bg-danger" style="top:-4px; right:-8px; font-size:0.65rem;">
+            @Model
+        </span>
+    }
+</a>

@@ -4,6 +4,7 @@ using AI_powerd_job_search_management_system.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AI_powerd_job_search_management_system.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260905132102_AddJobCategory")]
+    partial class AddJobCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -561,9 +564,6 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("JobId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -571,8 +571,6 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("JobId");
 
                     b.ToTable("Notifications");
                 });
@@ -1023,13 +1021,7 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AI_powerd_job_search_management_system.Models.Job", "Job")
-                        .WithMany()
-                        .HasForeignKey("JobId");
-
                     b.Navigation("ApplicationUser");
-
-                    b.Navigation("Job");
                 });
 
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Project", b =>

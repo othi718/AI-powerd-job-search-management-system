@@ -17,5 +17,8 @@ namespace AI_powerd_job_search_management_system.Models
 
         public bool IsRead { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public int? JobId { get; set; }
+        [ForeignKey(nameof(JobId))]
+        public Job? Job { get; set; }
     }
 }

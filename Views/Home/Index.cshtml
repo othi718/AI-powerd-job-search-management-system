@@ -1,8 +1,272 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- HERO CAROUSEL -->
+<div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel" style="border-radius: 22px; overflow: hidden;">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="hero-slide hero-slide-bg" style="background-image: url('@Url.Content("~/images/hero-1.jpg")');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1>Hiring, without the guesswork.</h1>
+                    <p>Post a job, tag the skills you need, and let AI matching do the sorting.</p>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-pill btn-ink">Post a job</a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide hero-slide-bg" style="background-image: url('@Url.Content("~/images/hero-2.jpg")');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1>Apply with confidence.</h1>
+                    <p>See your exact match score and missing skills before you apply.</p>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-pill btn-ink">Find a job</a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide hero-slide-bg" style="background-image: url('@Url.Content("~/images/hero-3.jpg")');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1>AI-powered matching.</h1>
+                    <p>Every application is scored automatically against the job's requirements.</p>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-pill btn-ink">Get started</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+
+<!-- QUICK VALUE CARDS -->
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card-clean card-hover h-100">
+            <div class="card-icon-wrap" style="background:#e7f5ff;color:#1c7ed6;">
+                <i class="bi bi-building-fill"></i>
+            </div>
+            <h5>For employers</h5>
+            <p class="text-muted mb-0">Post jobs, tag required skills, and review applicants ranked by AI match score.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-clean card-hover h-100">
+            <div class="card-icon-wrap" style="background:#ebfbee;color:#2f9e44;">
+                <i class="bi bi-person-workspace"></i>
+            </div>
+            <h5>For job seekers</h5>
+            <p class="text-muted mb-0">Browse open roles, upload your resume, and see exactly which skills you're missing.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-clean card-hover h-100">
+            <div class="card-icon-wrap" style="background:#fff4e6;color:#f08c00;">
+                <i class="bi bi-stars"></i>
+            </div>
+            <h5>AI-powered matching</h5>
+            <p class="text-muted mb-0">Every application is automatically scored against the job's required skills.</p>
+        </div>
+    </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-band mb-5">
+    <div class="row g-3 text-center">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#3b5bdb;">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <div class="stat-number">1,200+</div>
+                <div class="stat-label">Jobs Posted</div>
+                <span class="stat-badge">Verified employers</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#2f9e44;">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-number">10,000+</div>
+                <div class="stat-label">Registered Job Seekers</div>
+                <span class="stat-badge">Growing daily</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#f08c00;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Match Accuracy</div>
+                <span class="stat-badge">AI-scored</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#7048e8;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="stat-number">4.8/5</div>
+                <div class="stat-label">User Satisfaction</div>
+                <span class="stat-badge">1,000+ reviews</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT / WHY US SECTION -->
+<div class="row align-items-center g-5 mb-5">
+    <div class="col-lg-6">
+        <div class="about-image-wrap">
+            <img src="@Url.Content("~/images/about-team.jfif")" alt="SmartHire team" class="img-fluid rounded-4" />
+            <div class="floating-badge floating-badge-top">
+                <i class="bi bi-patch-check-fill"></i> AI Verified Matching
+            </div>
+            <div class="floating-badge floating-badge-bottom">
+                <i class="bi bi-award-fill"></i> Trusted by 1,200+ Employers
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <span class="eyebrow"><i class="bi bi-building"></i> ABOUT SMARTHIRE</span>
+        <h2 class="fw-bold mb-3">Redefining Hiring With Smart Matching</h2>
+        <p class="text-muted mb-4">
+            SmartHire connects employers and job seekers using AI-powered skill matching. Every job post and every
+            resume is analyzed automatically, so employers see the most relevant candidates first, and job seekers
+            know exactly where they stand before they apply.
+        </p>
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <div class="feature-pill">
+                    <div class="feature-pill-icon" style="background:#e7f5ff;color:#1c7ed6;">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">Instant Matching</div>
+                        <div class="text-muted small">Real-time skill scoring</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="feature-pill">
+                    <div class="feature-pill-icon" style="background:#ebfbee;color:#2f9e44;">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">Resume Insights</div>
+                        <div class="text-muted small">Know your missing skills</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="feature-pill">
+                    <div class="feature-pill-icon" style="background:#fff4e6;color:#f08c00;">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">Smart Alerts</div>
+                        <div class="text-muted small">Never miss a good fit</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="feature-pill">
+                    <div class="feature-pill-icon" style="background:#f3f0ff;color:#7048e8;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">Secure & Private</div>
+                        <div class="text-muted small">Your data stays protected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="text-center mb-4">
+    <span class="eyebrow d-inline-flex"><i class="bi bi-star-fill"></i> TESTIMONIALS</span>
+    <h2 class="fw-bold">What Our Users Say</h2>
+    <p class="text-muted">Real feedback from employers and job seekers who found success on SmartHire.</p>
+</div>
+
+<div class="row g-3 mb-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="testimonial-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="stars">★★★★★</div>
+                <span class="testimonial-tag">Hired in 5 days</span>
+            </div>
+            <p class="testimonial-quote">"We filled a senior developer role faster than any job board we've tried. The match scores actually meant something."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">TR</div>
+                <div>
+                    <div class="fw-semibold">Tanvir Rahman</div>
+                    <div class="text-muted small">HR Manager, TechNova</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="testimonial-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="stars">★★★★★</div>
+                <span class="testimonial-tag">Skill Gap Insights</span>
+            </div>
+            <p class="testimonial-quote">"I finally knew which skills I was missing before applying. Landed my first job within three weeks."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">FA</div>
+                <div>
+                    <div class="fw-semibold">Farhana Akter</div>
+                    <div class="text-muted small">Junior Data Analyst</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="testimonial-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="stars">★★★★★</div>
+                <span class="testimonial-tag">Easy Setup</span>
+            </div>
+            <p class="testimonial-quote">"Posting a job took minutes and the AI ranking of applicants saved our team hours of screening."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">SK</div>
+                <div>
+                    <div class="fw-semibold">Sadia Karim</div>
+                    <div class="text-muted small">Founder, BrightWorks</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="testimonial-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="stars">★★★★★</div>
+                <span class="testimonial-tag">Great Support</span>
+            </div>
+            <p class="testimonial-quote">"Clean interface, fast responses, and the notifications kept me updated on every application status."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">MH</div>
+                <div>
+                    <div class="fw-semibold">Mahmudul Hasan</div>
+                    <div class="text-muted small">Software Engineer</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

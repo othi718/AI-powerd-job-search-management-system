@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using AI_powerd_job_search_management_system.Data;
 using AI_powerd_job_search_management_system.Models;
 using AI_powerd_job_search_management_system.ViewModels;
+using AI_powerd_job_search_management_system.Utilities;
 
 namespace AI_powerd_job_search_management_system.Controllers
 {
@@ -25,9 +26,9 @@ namespace AI_powerd_job_search_management_system.Controllers
             _env = env;
         }
 
-        // =========================================================
+        
         // GET CURRENT JOB SEEKER
-        // =========================================================
+     
         private async Task<JobSeeker?> GetCurrentJobSeekerAsync()
         {
             var userId = _userManager.GetUserId(User);
@@ -37,45 +38,70 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+       
         // BROWSE JOBS
-        // =========================================================
-        public async Task<IActionResult> Index(string? search, string? location)
+  
+        public async Task<IActionResult> Index(string? search, string? location, string? category)
         {
             var jobsQuery = _context.Jobs
                 .Include(j => j.Employer)
                     .ThenInclude(e => e!.Company)
-                .Where(j =>
-                    j.Status == JobStatus.Open &&
-                    j.Employer!.Company!.IsApproved);
+                .Where(j => j.Status == JobStatus.Open && j.Employer!.Company!.IsApproved);
 
             if (!string.IsNullOrWhiteSpace(search))
-            {
-                jobsQuery = jobsQuery.Where(j =>
-                    j.Title.Contains(search));
-            }
+                jobsQuery = jobsQuery.Where(j => j.Title.Contains(search));
 
             if (!string.IsNullOrWhiteSpace(location))
-            {
-                jobsQuery = jobsQuery.Where(j =>
-                    j.Location != null &&
-                    j.Location.Contains(location));
-            }
+                jobsQuery = jobsQuery.Where(j => j.Location != null && j.Location.Contains(location));
 
-            var jobs = await jobsQuery
-                .OrderByDescending(j => j.PostedAt)
-                .ToListAsync();
+            if (!string.IsNullOrWhiteSpace(category))
+                jobsQuery = jobsQuery.Where(j => j.Category == category);
+
+            var jobs = await jobsQuery.OrderByDescending(j => j.PostedAt).ToListAsync();
+
+            var rawCounts = await _context.Jobs
+                .Where(j => j.Status == JobStatus.Open && j.Employer!.Company!.IsApproved)
+                .GroupBy(j => j.Category)
+                .Select(g => new { Category = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Category, x => x.Count);
+
+            var categoryCounts = JobCategories.All.ToDictionary(c => c, c => rawCounts.ContainsKey(c) ? rawCounts[c] : 0);
 
             ViewBag.Search = search;
             ViewBag.Location = location;
+            ViewBag.Category = category;
+            ViewBag.CategoryCounts = categoryCounts;
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                var categoryJobIds = await _context.Jobs
+                    .Where(j => j.Status == JobStatus.Open && j.Employer!.Company!.IsApproved && j.Category == category)
+                    .Select(j => j.Id)
+                    .ToListAsync();
+
+                int totalJobsInCategory = categoryJobIds.Count;
+
+                var skillDemand = await _context.JobSkills
+                    .Where(js => categoryJobIds.Contains(js.JobId))
+                    .Include(js => js.Skill)
+                    .GroupBy(js => js.Skill!.Name)
+                    .Select(g => new { Skill = g.Key, JobCount = g.Count() })
+                    .OrderByDescending(g => g.JobCount)
+                    .Take(6)
+                    .ToListAsync();
+
+                ViewBag.SkillLabels = skillDemand.Select(s => s.Skill).ToList();
+                ViewBag.SkillPercents = skillDemand
+                    .Select(s => totalJobsInCategory > 0 ? Math.Round((double)s.JobCount / totalJobsInCategory * 100, 1) : 0)
+                    .ToList();
+                ViewBag.TotalJobsInCategory = totalJobsInCategory;
+            }
 
             return View(jobs);
         }
 
-
-        // =========================================================
+       
         // JOB DETAILS
-        // =========================================================
+      
         public async Task<IActionResult> Details(int id)
         {
             var job = await _context.Jobs
@@ -100,9 +126,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // COMPLETE PROFILE - GET
-        // =========================================================
+    
         [HttpGet]
         public IActionResult CompleteProfile()
         {
@@ -110,9 +135,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // COMPLETE PROFILE - POST
-        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteProfile(
@@ -145,9 +169,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+     
         // MY RESUMES
-        // =========================================================
+      
         [HttpGet]
         public async Task<IActionResult> MyResumes()
         {
@@ -165,9 +189,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+      
         // PROFILE
-        // =========================================================
+     
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -191,9 +215,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+      
         // EDIT PROFILE - GET
-        // =========================================================
+  
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
@@ -212,9 +236,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // EDIT PROFILE - POST
-        // =========================================================
+    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(
@@ -237,9 +260,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+    
         // UPLOAD RESUME - GET
-        // =========================================================
+       
         [HttpGet]
         public IActionResult UploadResume()
         {
@@ -247,9 +270,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+        
         // UPLOAD RESUME - POST
-        // =========================================================
+ 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadResume(
@@ -322,9 +345,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // DELETE RESUME
-        // =========================================================
+    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteResume(int id)
@@ -361,9 +383,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+
         // APPLY - GET
-        // =========================================================
+      
         [HttpGet]
         public async Task<IActionResult> Apply(int jobId)
         {
@@ -408,9 +430,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+       
         // APPLY - POST
-        // =========================================================
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Apply(int jobId, int resumeId)
@@ -441,7 +463,7 @@ namespace AI_powerd_job_search_management_system.Controllers
             _context.JobApplications.Add(application);
             await _context.SaveChangesAsync();
 
-            // ===== AI matching: compare job's required skills vs this job seeker's skills =====
+            //  AI matching: compare job's required skills vs this job seeker's skills 
 
             var requiredSkills = await _context.JobSkills
                 .Where(js => js.JobId == jobId)
@@ -456,11 +478,11 @@ namespace AI_powerd_job_search_management_system.Controllers
                 .ToListAsync();
 
             var matchedSkills = requiredSkills
-                .Where(r => candidateSkills.Any(c => string.Equals(c, r, StringComparison.OrdinalIgnoreCase)))
+                .Where(r => candidateSkills.Any(c => SkillMatcher.IsMatch(c, r)))
                 .ToList();
 
             var missingSkills = requiredSkills
-                .Where(r => !candidateSkills.Any(c => string.Equals(c, r, StringComparison.OrdinalIgnoreCase)))
+                .Where(r => !candidateSkills.Any(c => SkillMatcher.IsMatch(c, r)))
                 .ToList();
 
             double score = requiredSkills.Any()
@@ -485,9 +507,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+       
         // MY APPLICATIONS
-        // =========================================================
+      
         [HttpGet]
         public async Task<IActionResult> MyApplications()
         {
@@ -508,10 +530,8 @@ namespace AI_powerd_job_search_management_system.Controllers
             return View(applications);
         }
 
-
-        // =========================================================
         // MY SKILLS
-        // =========================================================
+      
         [HttpGet]
         public async Task<IActionResult> Skills()
         {
@@ -530,9 +550,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+      
         // ADD SKILL
-        // =========================================================
+     
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddSkill(string skillName)
@@ -578,9 +598,9 @@ namespace AI_powerd_job_search_management_system.Controllers
             return RedirectToAction("Skills");
         }
 
-        // =========================================================
+     
         // DELETE SKILL
-        // =========================================================
+ 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteSkill(int id)
@@ -606,9 +626,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // NOTIFICATIONS
-        // =========================================================
+       
         [HttpGet]
         public async Task<IActionResult> Notifications()
         {
@@ -618,12 +637,10 @@ namespace AI_powerd_job_search_management_system.Controllers
                 return RedirectToAction("CompleteProfile");
 
             var notifications = await _context.Notifications
-                .Where(n =>
-                    n.ApplicationUserId ==
-                    jobSeeker.ApplicationUserId)
-                .OrderByDescending(n => n.CreatedAt)
-                .ToListAsync();
-
+       .Include(n => n.Job)
+       .Where(n => n.ApplicationUserId == jobSeeker.ApplicationUserId)
+       .OrderByDescending(n => n.CreatedAt)
+       .ToListAsync();
             // Mark notifications as read
             foreach (var notification in notifications)
             {

@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Browse Jobs";
+    var categoryCounts = (Dictionary<string, int>)ViewBag.CategoryCounts;
+    bool hasSkillChart = ViewBag.SkillLabels != null && ((List<string>)ViewBag.SkillLabels).Any();
 }
 
 <div class="page-header">
@@ -12,33 +14,106 @@
 <form method="get" class="card-clean d-flex flex-wrap gap-2 mb-4">
     <input type="text" name="search" value="@ViewBag.Search" class="form-control" style="max-width: 260px;" placeholder="Job title..." />
     <input type="text" name="location" value="@ViewBag.Location" class="form-control" style="max-width: 220px;" placeholder="Location..." />
+    <input type="hidden" name="category" value="@ViewBag.Category" />
     <button type="submit" class="btn btn-pill btn-ink">Search</button>
 </form>
 
-@if (!Model.Any())
+@if (!string.IsNullOrEmpty(ViewBag.Category as string))
 {
-    <div class="card-clean text-center py-5">
-        <p class="mb-0 text-muted">No open jobs found.</p>
+    <div class="mb-3">
+        <span class="text-muted small">Filtering by:</span>
+        <span class="badge-pill badge-open">
+            @ViewBag.Category
+            <a asp-action="Index" style="color:inherit; text-decoration:none;" class="ms-1">&times;</a>
+        </span>
     </div>
 }
-else
-{
-    <div class="row g-3">
-        @foreach (var job in Model)
+
+<div class="card-clean mb-4">
+    <h5 class="mb-3">Browse by category</h5>
+    <div class="row g-2">
+        @foreach (var kvp in categoryCounts)
         {
-            <div class="col-md-6">
-                <div class="card-clean card-hover job-card h-100 d-flex flex-row gap-3">
-                    <div class="job-company-badge">@(job.Employer?.Company?.Name?.Substring(0, 1) ?? "?")</div>
-                    <div class="flex-grow-1">
-                        <h5>@job.Title</h5>
-                        <p class="job-meta mb-2">@job.Employer?.Company?.Name &middot; @job.Location</p>
-                        <p class="small text-muted mb-3">
-                            @(job.Description.Length > 110 ? job.Description.Substring(0, 110) + "..." : job.Description)
-                        </p>
-                        <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-pill btn-mint-outline btn-sm">View details</a>
-                    </div>
-                </div>
+            <div class="col-md-4 col-6">
+                <a asp-action="Index" asp-route-category="@kvp.Key"
+                   class="d-flex justify-content-between align-items-center p-2 rounded"
+                   style="background:#F7F5EF; text-decoration:none; color: var(--ink);">
+                    <span>@kvp.Key</span>
+                    <span class="badge-pill badge-open">@kvp.Value</span>
+                </a>
             </div>
         }
     </div>
+</div>
+
+<div class="row g-3">
+    <div class="@(hasSkillChart ? "col-lg-8" : "col-12")">
+        @if (!Model.Any())
+        {
+            <div class="card-clean text-center py-5">
+                <p class="mb-0 text-muted">No open jobs found.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var job in Model)
+                {
+                    <div class="col-md-6">
+                        <div class="card-clean card-hover job-card h-100 d-flex flex-row gap-3">
+                            <div class="job-company-badge">@(job.Employer?.Company?.Name?.Substring(0, 1) ?? "?")</div>
+                            <div class="flex-grow-1">
+                                <h5>@job.Title</h5>
+                                <p class="job-meta mb-2">@job.Employer?.Company?.Name &middot; @job.Location</p>
+                                <p class="small text-muted mb-3">
+                                    @(job.Description.Length > 110 ? job.Description.Substring(0, 110) + "..." : job.Description)
+                                </p>
+                                <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-pill btn-mint-outline btn-sm">View details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    @if (hasSkillChart)
+    {
+        <div class="col-lg-4">
+            <div class="card-clean">
+                <h5 class="mb-1">Skill demand</h5>
+                <p class="text-muted small mb-3">Among @ViewBag.TotalJobsInCategory jobs in @ViewBag.Category</p>
+                <canvas id="skillDemandChart" height="220"></canvas>
+            </div>
+        </div>
+    }
+</div>
+
+@if (hasSkillChart)
+{
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script>
+            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SkillLabels));
+            const percents = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SkillPercents));
+
+            new Chart(document.getElementById('skillDemandChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '% of jobs requiring this skill',
+                        data: percents,
+                        backgroundColor: '#55611F',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { max: 100, ticks: { callback: v => v + '%' } } }
+                }
+            });
+        </script>
+    }
 }

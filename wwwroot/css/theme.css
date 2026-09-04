@@ -1,20 +1,22 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --ink: #0B1220;
-    --ink-soft: #5B6472;
-    --mint: #10B981;
-    --mint-dark: #0E9F71;
-    --mint-soft: #D1FAE5;
-    --bg: #F6FBF8;
+    --ink: #3A2E22;
+    --ink-soft: #857A68;
+    --olive: #55611F;
+    --olive-dark: #414A18;
+    --olive-soft: #E7E9D6;
+    --brown: #8B5E3C;
+    --brown-soft: #EFE7D9;
+    --bg: #F7F5EF;
     --surface: #FFFFFF;
-    --border: #E4E9EE;
-    --danger: #DC2626;
+    --border: #E5E1D3;
+    --danger: #A8402A;
     --radius-lg: 18px;
     --radius-md: 12px;
     --radius-pill: 999px;
-    --shadow-sm: 0 1px 3px rgba(11, 18, 32, 0.06);
-    --shadow-md: 0 12px 28px rgba(11, 18, 32, 0.10);
+    --shadow-sm: 0 1px 3px rgba(58, 46, 34, 0.08);
+    --shadow-md: 0 12px 28px rgba(58, 46, 34, 0.12);
 }
 
 body {
@@ -30,15 +32,14 @@ h1, h2, h3, h4, .brand-mark {
 }
 
 a {
-    color: var(--mint-dark);
+    color: var(--olive-dark);
     text-decoration: none;
 }
 
     a:hover {
-        color: var(--ink);
+        color: var(--brown);
     }
 
-/* ---------- Navbar ---------- */
 .site-navbar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -57,7 +58,7 @@ a {
         width: 9px;
         height: 9px;
         border-radius: 50%;
-        background: var(--mint);
+        background: var(--olive);
         display: inline-block;
     }
 
@@ -67,12 +68,10 @@ a {
     padding: 0.5rem 0.9rem !important;
 }
 
-    .site-navbar .nav-link.active,
-    .site-navbar .nav-link:hover {
+    .site-navbar .nav-link.active, .site-navbar .nav-link:hover {
         color: var(--ink) !important;
     }
 
-/* ---------- Buttons ---------- */
 .btn-pill {
     border-radius: var(--radius-pill);
     padding: 0.6rem 1.5rem;
@@ -83,24 +82,24 @@ a {
 }
 
 .btn-ink {
-    background: var(--ink);
+    background: var(--olive);
     color: #fff;
 }
 
     .btn-ink:hover {
-        background: #000;
+        background: var(--olive-dark);
         color: #fff;
         transform: translateY(-1px);
     }
 
 .btn-mint-outline {
     background: transparent;
-    border: 1.5px solid var(--ink);
-    color: var(--ink);
+    border: 1.5px solid var(--olive);
+    color: var(--olive-dark);
 }
 
     .btn-mint-outline:hover {
-        background: var(--ink);
+        background: var(--olive);
         color: #fff;
     }
 
@@ -115,7 +114,6 @@ a {
         color: var(--ink);
     }
 
-/* ---------- Cards ---------- */
 .card-clean {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -133,7 +131,6 @@ a {
         transform: translateY(-2px);
     }
 
-/* ---------- Forms ---------- */
 .form-label {
     font-weight: 600;
     font-size: 0.875rem;
@@ -142,20 +139,20 @@ a {
 }
 
 .form-control, .form-select {
-    background: #F8FAFC;
+    background: #FBF8F2;
     border: 1.5px solid var(--border);
     border-radius: var(--radius-md);
     padding: 0.65rem 0.9rem;
     font-size: 0.95rem;
+    color: var(--ink);
 }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--mint);
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        border-color: var(--olive);
+        box-shadow: 0 0 0 3px rgba(85, 97, 31, 0.15);
         background: #fff;
     }
 
-/* ---------- Auth split layout ---------- */
 .auth-card {
     display: flex;
     max-width: 960px;
@@ -168,7 +165,7 @@ a {
 
 .auth-visual {
     flex: 1 1 42%;
-    background: linear-gradient(155deg, #D8FBEA 0%, #CFF7F0 45%, #E3F3FF 100%);
+    background: linear-gradient(155deg, #F3F1E4 0%, #EDEAD6 45%, #E3E6CF 100%);
     padding: 3rem 2.25rem;
     display: flex;
     flex-direction: column;
@@ -179,6 +176,7 @@ a {
         font-size: 1.9rem;
         line-height: 1.25;
         margin-bottom: 0.75rem;
+        color: var(--ink);
     }
 
     .auth-visual p {
@@ -199,7 +197,6 @@ a {
     }
 }
 
-/* ---------- Badges ---------- */
 .badge-pill {
     border-radius: var(--radius-pill);
     padding: 0.3rem 0.75rem;
@@ -208,22 +205,21 @@ a {
 }
 
 .badge-open {
-    background: var(--mint-soft);
-    color: var(--mint-dark);
+    background: var(--olive-soft);
+    color: var(--olive-dark);
 }
 
 .badge-closed {
-    background: #F1F3F5;
-    color: var(--ink-soft);
+    background: var(--brown-soft);
+    color: var(--brown);
 }
 
-/* ---------- Job cards ---------- */
 .job-card .job-company-badge {
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background: var(--mint-soft);
-    color: var(--mint-dark);
+    background: var(--olive-soft);
+    color: var(--olive-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -241,7 +237,6 @@ a {
     font-size: 0.875rem;
 }
 
-/* ---------- Dashboard header ---------- */
 .page-header {
     margin-bottom: 1.75rem;
 }
@@ -254,3 +249,405 @@ a {
         color: var(--ink-soft);
         margin-bottom: 0;
     }
+
+.table > tbody > tr:hover {
+    background: #FAF6EE;
+}
+
+.table > thead > tr > th {
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: 0.75rem;
+}
+
+.btn-pill:focus-visible, .form-control:focus-visible, a:focus-visible {
+    outline: 2px solid var(--olive);
+    outline-offset: 2px;
+}
+
+.card-clean, .btn-pill {
+    transition: box-shadow 0.15s ease, transform 0.12s ease, background 0.12s ease;
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1120px;
+    }
+}
+/* ---------- Hero carousel ---------- */
+.hero-slide {
+    background: linear-gradient(155deg, #F3EFE1 0%, #E9E6CB 45%, #DDE3C6 100%);
+    padding: 5rem 3rem;
+    text-align: center;
+}
+
+    .hero-slide h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-slide p {
+        color: var(--ink-soft);
+        font-size: 1.05rem;
+        max-width: 480px;
+        margin: 0 auto 1.5rem;
+    }
+
+.carousel-indicators [data-bs-target] {
+    background-color: var(--olive);
+}
+
+.carousel-control-prev-icon, .carousel-control-next-icon {
+    filter: invert(1) grayscale(100%);
+    opacity: 0.6;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 3rem 0 1.5rem;
+    margin-top: 4rem;
+}
+
+    .site-footer h6 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-soft);
+        margin-bottom: 1rem;
+    }
+
+    .site-footer a.footer-link {
+        display: block;
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+        .site-footer a.footer-link:hover {
+            color: var(--olive-dark);
+        }
+
+.social-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--olive-soft);
+    color: var(--olive-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    transition: background 0.15s ease;
+}
+
+    .social-icon:hover {
+        background: var(--olive);
+        color: #fff;
+    }
+/* ---------- Fix browser autofill color override ---------- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #FBF8F2 inset !important;
+    -webkit-text-fill-color: var(--ink) !important;
+    caret-color: var(--ink);
+    border-color: var(--border) !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+.hero-slide-bg {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+}
+/* ---- Stats band ---- */
+.stats-band {
+    background: #f8f9fb;
+    border-radius: 22px;
+    padding: 2.5rem 1.5rem;
+}
+
+.stat-card {
+    padding: 0.5rem;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.25rem;
+    margin: 0 auto 0.75rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+.stat-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: #eef1f6;
+    color: #495057;
+    padding: 2px 10px;
+    border-radius: 999px;
+}
+
+/* ---- About section ---- */
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #3b5bdb;
+    background: #eef1ff;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
+}
+
+.about-image-wrap {
+    position: relative;
+}
+
+    .about-image-wrap img {
+        width: 100%;
+        height: 420px;
+        object-fit: cover;
+    }
+
+.floating-badge {
+    position: absolute;
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.floating-badge-top {
+    top: -18px;
+    right: 20px;
+    color: #2f9e44;
+}
+
+.floating-badge-bottom {
+    bottom: -18px;
+    left: 20px;
+    color: #1c1c1c;
+}
+
+.feature-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    padding: 12px 14px;
+    height: 100%;
+}
+
+.feature-pill-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ---- Testimonials ---- */
+.testimonial-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    padding: 1.25rem;
+    height: 100%;
+}
+
+.stars {
+    color: #f59f00;
+    letter-spacing: 2px;
+}
+
+.testimonial-tag {
+    font-size: 0.7rem;
+    background: #eef1f6;
+    color: #495057;
+    padding: 2px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.testimonial-quote {
+    font-size: 0.9rem;
+    color: #333;
+    margin: 0.75rem 0 1rem;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.author-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #3b5bdb;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.15) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 3rem;
+    max-width: 640px;
+    color: #fff;
+}
+
+    .hero-content h1 {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-content p {
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 1.5rem;
+    }
+/* ---- Quick value cards: hover lift + icon ---- */
+.card-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    border: 1px solid transparent;
+    cursor: default;
+}
+
+    .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+        border-color: rgba(0, 0, 0, 0.05);
+    }
+/* ---- Dashboard stat cards ---- */
+.stat-card-lg {
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+    .stat-card-lg .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.1rem;
+        margin: 0 auto 0.75rem;
+    }
+
+    .stat-card-lg h3 {
+        font-size: 1.9rem;
+        font-weight: 700;
+    }
+
+/* ---- Job postings table ---- */
+.job-table thead th {
+    border-bottom: 1px solid #eee;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.job-table tbody tr {
+    border-bottom: 1px solid #f2f2f2;
+    transition: background 0.2s ease;
+}
+
+    .job-table tbody tr:hover {
+        background: #fafafa;
+    }
+
+    .job-table tbody tr td {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+.job-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #eef1ff;
+    color: #3b5bdb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 5px;
+    background: currentColor;
+}
+
+.applicant-count {
+    display: inline-flex;
+    align-items: center;
+    background: #f4f4f4;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+}

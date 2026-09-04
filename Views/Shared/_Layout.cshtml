@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SmartHire</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
     <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
 </head>
 <body>
@@ -34,30 +36,33 @@
                             }
                             @if (User.IsInRole("JobSeeker"))
                             {
-                                <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="Index">Browse Jobs</a></li>
-                                <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="Profile">My Profile</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Jobs</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="JobSeeker" asp-action="Index">All Jobs</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        @foreach (var c in AI_powerd_job_search_management_system.Utilities.JobCategories.All)
+                                        {
+                                            <li><a class="dropdown-item" asp-controller="JobSeeker" asp-action="Index" asp-route-category="@c">@c</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="MyResumes">My Resumes</a></li>
                                 <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="MyApplications">My Applications</a></li>
-                                <li class="nav-item">
-                                    <a class="nav-link"
-                                       asp-controller="JobSeeker"
-                                       asp-action="Skills">
-                                        My Skills
-                                    </a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link"
-                                       asp-controller="JobSeeker"
-                                       asp-action="Notifications">
-                                        🔔 Notifications
-                                    </a>
-                                </li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="Skills">Skills</a></li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="Profile">My Profile</a></li>
                             }
                         }
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
+                            @if (User.IsInRole("JobSeeker"))
+                            {
+                                <li class="nav-item d-flex align-items-center">
+                                    @await Component.InvokeAsync("NotificationBell")
+                                </li>
+                            }
                             <li class="nav-item d-flex align-items-center me-2">
                                 <span class="text-muted small">@User.Identity.Name</span>
                             </li>
@@ -88,9 +93,48 @@
         </main>
     </div>
 
-    <footer class="border-top py-4 mt-5">
-        <div class="container text-center text-muted small">
-            &copy; 2026 - SmartHire
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="brand-mark mb-2"><span class="dot"></span> SmartHire</div>
+                    <p class="text-muted small" style="max-width: 260px;">
+                        Connecting employers and job seekers with AI-powered skill matching.
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Quick links</h6>
+                    <a class="footer-link" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="footer-link" asp-controller="Account" asp-action="Register">Join now</a>
+                    <a class="footer-link" asp-controller="Account" asp-action="Login">Sign in</a>
+                    <a class="footer-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </div>
+                <div class="col-md-3">
+                    <h6>Contact</h6>
+                    <p class="text-muted small mb-1">support@smarthire.com</p>
+                    <p class="text-muted small mb-1">+880 1XXX-XXXXXX</p>
+                    <p class="text-muted small">Dhaka, Bangladesh</p>
+                </div>
+                <div class="col-md-2">
+                    <h6>Follow us</h6>
+                    <div>
+                        <a href="#" class="social-icon" title="Facebook">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z" /></svg>
+                        </a>
+                        <a href="#" class="social-icon" title="LinkedIn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 3H3.6A.6.6 0 0 0 3 3.6v16.8a.6.6 0 0 0 .6.6h16.8a.6.6 0 0 0 .6-.6V3.6a.6.6 0 0 0-.6-.6zM8.3 18.3H5.7V9.9h2.6v8.4zM7 8.8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm11.3 9.5h-2.6v-4.1c0-1-.4-1.7-1.3-1.7-.7 0-1.1.5-1.3 1-.1.2-.1.4-.1.7v4.1h-2.6s.1-6.8 0-8.4h2.6v1.2c.3-.5 1-1.3 2.3-1.3 1.7 0 3 1.1 3 3.5v5z" /></svg>
+                        </a>
+                        <a href="#" class="social-icon" title="Twitter">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.6 11.6 0 0 1 3.4 4.6a4 4 0 0 0 1.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.2 4.2 0 0 1-1.9.1 4.1 4.1 0 0 0 3.8 2.9A8.3 8.3 0 0 1 2 18.4a11.6 11.6 0 0 0 6.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z" /></svg>
+                        </a>
+                        <a href="#" class="social-icon" title="Instagram">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 2 .3 2.4.5.6.2 1 .6 1.5 1a4 4 0 0 1 1 1.5c.2.5.4 1.2.5 2.4.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 2-.5 2.4a4 4 0 0 1-1 1.5c-.5.4-.9.8-1.5 1-.4.2-1.2.4-2.4.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-2-.3-2.4-.5a4 4 0 0 1-1.5-1 4 4 0 0 1-1-1.5c-.2-.4-.4-1.2-.5-2.4C2 15.6 2 15.2 2 12s0-3.6.1-4.9c.1-1.2.3-2 .5-2.4a4 4 0 0 1 1-1.5 4 4 0 0 1 1.5-1c.4-.2 1.2-.4 2.4-.5C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.7.1-1 0-1.6.2-2 .4-.5.2-.8.4-1.2.8-.4.4-.6.7-.8 1.2-.1.4-.3 1-.4 2C3 9.5 3 9.9 3 13c0 3.1 0 3.5.1 4.7 0 1 .2 1.6.4 2 .2.5.4.8.8 1.2.4.4.7.6 1.2.8.4.1 1 .3 2 .4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1 0 1.6-.2 2-.4.5-.2.8-.4 1.2-.8.4-.4.6-.7.8-1.2.1-.4.3-1 .4-2 .1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c0-1-.2-1.6-.4-2a3.2 3.2 0 0 0-.8-1.2 3.2 3.2 0 0 0-1.2-.8c-.4-.1-1-.3-2-.4-1.2 0-1.6-.1-4.7-.1zm0 3.4a5.6 5.6 0 1 1 0 11.2 5.6 5.6 0 0 1 0-11.2zm0 9.2a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2zm5.8-9.4a1.3 1.3 0 1 1-2.6 0 1.3 1.3 0 0 1 2.6 0z" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: var(--border);" />
+            <div class="text-center text-muted small">&copy; 2026 SmartHire. All rights reserved.</div>
         </div>
     </footer>
 

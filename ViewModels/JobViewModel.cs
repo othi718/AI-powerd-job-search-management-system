@@ -19,5 +19,7 @@ namespace AI_powerd_job_search_management_system.ViewModels
         [Display(Name = "Required Skills")]
         [Required]
         public string RequiredSkills { get; set; } = string.Empty;
+        [Required]
+        public string Category { get; set; } = string.Empty;
     }
 }

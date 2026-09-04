@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using AI_powerd_job_search_management_system.Data;
 using AI_powerd_job_search_management_system.Models;
 using AI_powerd_job_search_management_system.ViewModels;
+using AI_powerd_job_search_management_system.Utilities;
 
 namespace AI_powerd_job_search_management_system.Controllers
 {
@@ -23,9 +24,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // EMPLOYER DASHBOARD
-        // =========================================================
+        
         public async Task<IActionResult> Index()
         {
             var employer = await GetCurrentEmployerAsync();
@@ -43,9 +43,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+   
         // CREATE JOB - GET
-        // =========================================================
+
         [HttpGet]
         public IActionResult CreateJob()
         {
@@ -53,32 +53,32 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+       
         // CREATE JOB - POST
-        // =========================================================
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateJob(JobViewModel model)
         {
-            // -----------------------------------------------------
+          
             // Validate form
-            // -----------------------------------------------------
+           
             if (!ModelState.IsValid)
                 return View(model);
 
 
-            // -----------------------------------------------------
+          
             // Get logged-in employer
-            // -----------------------------------------------------
+           
             var employer = await GetCurrentEmployerAsync();
 
             if (employer == null)
                 return RedirectToAction("CompleteProfile");
 
 
-            // =====================================================
+         
             // 1. CREATE JOB
-            // =====================================================
+            
 
             var job = new Job
             {
@@ -87,6 +87,7 @@ namespace AI_powerd_job_search_management_system.Controllers
                 Description = model.Description,
                 Location = model.Location,
                 SalaryRange = model.SalaryRange,
+                Category = model.Category,
                 Status = JobStatus.Open
             };
 
@@ -96,9 +97,9 @@ namespace AI_powerd_job_search_management_system.Controllers
             await _context.SaveChangesAsync();
 
 
-            // =====================================================
+     
             // 2. GET REQUIRED SKILLS
-            // =====================================================
+          
 
             var requiredSkillNames = new List<string>();
 
@@ -115,9 +116,8 @@ namespace AI_powerd_job_search_management_system.Controllers
             }
 
 
-            // =====================================================
             // 3. CREATE JOB SKILLS
-            // =====================================================
+         
 
             foreach (var skillName in requiredSkillNames)
             {
@@ -128,9 +128,9 @@ namespace AI_powerd_job_search_management_system.Controllers
                         skillName.ToLower());
 
 
-                // -------------------------------------------------
+               
                 // If skill doesn't exist, create it
-                // -------------------------------------------------
+               
                 if (skill == null)
                 {
                     skill = new Skill
@@ -145,9 +145,8 @@ namespace AI_powerd_job_search_management_system.Controllers
                 }
 
 
-                // -------------------------------------------------
                 // Check duplicate JobSkill
-                // -------------------------------------------------
+               
                 var alreadyExists =
                     await _context.JobSkills.AnyAsync(js =>
                         js.JobId == job.Id &&
@@ -170,9 +169,8 @@ namespace AI_powerd_job_search_management_system.Controllers
             await _context.SaveChangesAsync();
 
 
-            // =====================================================
             // 4. LOAD JOB REQUIRED SKILLS
-            // =====================================================
+        
 
             var jobSkills = await _context.JobSkills
                 .Where(js =>
@@ -189,9 +187,9 @@ namespace AI_powerd_job_search_management_system.Controllers
                 .ToList();
 
 
-            // =====================================================
+
             // 5. FIND ALL JOB SEEKERS
-            // =====================================================
+         
 
             var jobSeekers = await _context.JobSeekers
                 .Include(js => js.Skills)
@@ -202,9 +200,8 @@ namespace AI_powerd_job_search_management_system.Controllers
             int notificationCount = 0;
 
 
-            // =====================================================
             // 6. COMPARE JOB SKILLS WITH JOB SEEKER SKILLS
-            // =====================================================
+        
 
             foreach (var seeker in jobSeekers)
             {
@@ -215,37 +212,24 @@ namespace AI_powerd_job_search_management_system.Controllers
                     .ToList();
 
 
-                // -------------------------------------------------
                 // Find matching skills
-                // -------------------------------------------------
+            
 
                 var matchingSkills = requiredSkills
-                    .Where(required =>
-                        candidateSkills.Any(candidate =>
-                            string.Equals(
-                                candidate,
-                                required,
-                                StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
+      .Where(required => candidateSkills.Any(candidate => SkillMatcher.IsMatch(candidate, required)))
+      .ToList();
 
-
-                // -------------------------------------------------
+                
                 // Find missing skills
-                // -------------------------------------------------
+               
 
                 var missingSkills = requiredSkills
-                    .Where(required =>
-                        !candidateSkills.Any(candidate =>
-                            string.Equals(
-                                candidate,
-                                required,
-                                StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
+      .Where(required => !candidateSkills.Any(candidate => SkillMatcher.IsMatch(candidate, required)))
+      .ToList();
 
 
-                // =================================================
                 // 7. CALCULATE MATCH PERCENTAGE
-                // =================================================
+           
 
                 int matchPercentage = 0;
 
@@ -259,9 +243,9 @@ namespace AI_powerd_job_search_management_system.Controllers
                 }
 
 
-                // =================================================
+             
                 // 8. CREATE NOTIFICATION
-                // =================================================
+              
 
                 // Only notify if there is at least one matching
                 // skill.
@@ -288,6 +272,7 @@ namespace AI_powerd_job_search_management_system.Controllers
                     {
                         ApplicationUserId =
                             seeker.ApplicationUserId,
+                        JobId = job.Id,
 
                         Message = message,
 
@@ -304,16 +289,15 @@ namespace AI_powerd_job_search_management_system.Controllers
             }
 
 
-            // =====================================================
-            // 9. SAVE NOTIFICATIONS
-            // =====================================================
+            
+     
 
             await _context.SaveChangesAsync();
 
 
-            // =====================================================
+           
             // 10. SHOW RESULT TO EMPLOYER
-            // =====================================================
+        
 
             if (requiredSkills.Any())
             {
@@ -334,9 +318,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+      
         // EDIT JOB - GET
-        // =========================================================
+      
         [HttpGet]
         public async Task<IActionResult> EditJob(int id)
         {
@@ -360,7 +344,9 @@ namespace AI_powerd_job_search_management_system.Controllers
                 Title = job.Title,
                 Description = job.Description,
                 Location = job.Location,
-                SalaryRange = job.SalaryRange
+                SalaryRange = job.SalaryRange,
+                Category = job.Category
+
             };
             model.RequiredSkills = string.Join(", ", await _context.JobSkills
     .Where(js => js.JobId == job.Id)
@@ -369,13 +355,13 @@ namespace AI_powerd_job_search_management_system.Controllers
     .ToListAsync());
 
 
+
             return View(model);
         }
 
 
-        // =========================================================
         // EDIT JOB - POST
-        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditJob(
@@ -405,6 +391,7 @@ namespace AI_powerd_job_search_management_system.Controllers
             job.Description = model.Description;
             job.Location = model.Location;
             job.SalaryRange = model.SalaryRange;
+            job.Category = model.Category;
 
 
             await _context.SaveChangesAsync();
@@ -436,9 +423,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // TOGGLE JOB STATUS
-        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(int id)
@@ -476,9 +462,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+        
         // COMPLETE EMPLOYER PROFILE - GET
-        // =========================================================
+        
         [HttpGet]
         public IActionResult CompleteProfile()
         {
@@ -487,9 +473,9 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
+        
         // COMPLETE EMPLOYER PROFILE - POST
-        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteProfile(
@@ -513,9 +499,7 @@ namespace AI_powerd_job_search_management_system.Controllers
                 return RedirectToAction("Index");
 
 
-            // =====================================================
             // CREATE COMPANY
-            // =====================================================
 
             var company = new Company
             {
@@ -532,9 +516,7 @@ namespace AI_powerd_job_search_management_system.Controllers
             await _context.SaveChangesAsync();
 
 
-            // =====================================================
             // CREATE EMPLOYER
-            // =====================================================
 
             var employer = new Employer
             {
@@ -553,9 +535,7 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // GET CURRENT EMPLOYER
-        // =========================================================
         private async Task<Employer?> GetCurrentEmployerAsync()
         {
             var userId = _userManager.GetUserId(User);
@@ -567,9 +547,8 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // APPLICANTS
-        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> Applicants(int jobId)
         {
@@ -609,51 +588,39 @@ namespace AI_powerd_job_search_management_system.Controllers
         }
 
 
-        // =========================================================
         // UPDATE APPLICATION STATUS
-        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult>
-            UpdateApplicationStatus(
-                int applicationId,
-                ApplicationStatus status)
+        public async Task<IActionResult> UpdateApplicationStatus(int applicationId, ApplicationStatus status)
         {
-            var employer =
-                await GetCurrentEmployerAsync();
+            var employer = await GetCurrentEmployerAsync();
+            if (employer == null) return RedirectToAction("CompleteProfile");
 
+            var application = await _context.JobApplications
+                .Include(a => a.Job)
+                .Include(a => a.JobSeeker)
+                .FirstOrDefaultAsync(a => a.Id == applicationId && a.Job!.EmployerId == employer.Id);
 
-            if (employer == null)
-                return RedirectToAction("CompleteProfile");
-
-
-            var application =
-                await _context.JobApplications
-
-                    .Include(a => a.Job)
-
-                    .FirstOrDefaultAsync(a =>
-                        a.Id == applicationId &&
-                        a.Job!.EmployerId ==
-                        employer.Id);
-
-
-            if (application == null)
-                return NotFound();
-
+            if (application == null) return NotFound();
 
             application.Status = status;
-
-
             await _context.SaveChangesAsync();
 
+            _context.Notifications.Add(new Notification
+            {
+                ApplicationUserId = application.JobSeeker!.ApplicationUserId,
+                JobId = application.JobId,
+                Message = $"Your application for \"{application.Job!.Title}\" is now: {status}.",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
 
-            return RedirectToAction(
-                "Applicants",
-                new
-                {
-                    jobId = application.JobId
-                });
+            return RedirectToAction("Applicants", new { jobId = application.JobId });
         }
+
+
+
     }
 }

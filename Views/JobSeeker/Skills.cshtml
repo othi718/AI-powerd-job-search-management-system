@@ -13,16 +13,11 @@
 
     @if (TempData["SkillSuccess"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["SkillSuccess"]
-        </div>
+        <div class="badge-pill badge-open d-inline-block mb-3">@TempData["SkillSuccess"]</div>
     }
-
     @if (TempData["SkillError"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["SkillError"]
-        </div>
+        <div class="badge-pill mb-3 d-inline-block" style="background: #FBEAE5; color: var(--danger);">@TempData["SkillError"]</div>
     }
 
     <form asp-action="AddSkill" method="post">
@@ -66,7 +61,7 @@
 
             @foreach (var item in Model)
             {
-                <div class="border rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                <div class="badge-pill badge-open d-flex align-items-center gap-2" style="padding: 0.5rem 0.9rem;">
 
                     <span>
                         @item.Skill?.Name
