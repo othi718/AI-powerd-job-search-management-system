@@ -1,0 +1,40 @@
+﻿@model List<AI_powerd_job_search_management_system.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="page-header">
+    <h2>Notifications</h2>
+    <p>@Model.Count() total</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-clean text-center py-5">
+        <p class="mb-0 text-muted">No notifications yet.</p>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-2">
+        @foreach (var n in Model)
+        {
+            @if (n.JobApplicationId != null)
+            {
+                <a asp-controller="Messages" asp-action="Chat" asp-route-applicationId="@n.JobApplicationId"
+                   class="card-clean py-3 d-block" style="color: inherit;">
+                    <p class="mb-1">@n.Message</p>
+                    <small class="text-muted">@n.CreatedAt.ToString("dd MMM yyyy, h:mm tt") &middot; Click to view &rarr;</small>
+                </a>
+            }
+            else
+            {
+                <div class="card-clean py-3">
+                    <p class="mb-1">@n.Message</p>
+                    <small class="text-muted">@n.CreatedAt.ToString("dd MMM yyyy, h:mm tt")</small>
+                </div>
+            }
+        }
+    </div>
+}

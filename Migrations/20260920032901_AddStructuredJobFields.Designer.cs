@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AI_powerd_job_search_management_system.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260905135148_AddJobIdToNotification")]
-    partial class AddJobIdToNotification
+    [Migration("20260920032901_AddStructuredJobFields")]
+    partial class AddStructuredJobFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AIInsight")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("AnalyzedAt")
                         .HasColumnType("datetime2");
@@ -134,6 +137,36 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Branch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("Branches");
+                });
+
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.CandidateSkill", b =>
                 {
                     b.Property<int>("Id")
@@ -198,14 +231,23 @@ namespace AI_powerd_job_search_management_system.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ContactEmail")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Insights")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LogoPath")
                         .HasColumnType("nvarchar(max)");
@@ -215,12 +257,77 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Website")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.CompanyFollow", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FollowedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JobSeekerUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("JobSeekerUserId", "CompanyId")
+                        .IsUnique();
+
+                    b.ToTable("CompanyFollows");
+                });
+
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.CompanyReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JobSeekerUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("JobSeekerUserId", "CompanyId")
+                        .IsUnique();
+
+                    b.ToTable("CompanyReviews");
                 });
 
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Education", b =>
@@ -272,20 +379,31 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsApprovedByOwner")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("BranchId");
 
                     b.HasIndex("CompanyId");
 
@@ -372,6 +490,10 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -389,6 +511,40 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.ToTable("Interviews");
                 });
 
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.InterviewMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("JobApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobApplicationId");
+
+                    b.HasIndex("SenderUserId");
+
+                    b.ToTable("InterviewMessages");
+                });
+
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Job", b =>
                 {
                     b.Property<int>("Id")
@@ -397,22 +553,43 @@ namespace AI_powerd_job_search_management_system.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdditionalRequirements")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Benefits")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EducationRequirement")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("EmployerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ExperienceRequirement")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PostedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Responsibilities")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SalaryRange")
                         .HasColumnType("nvarchar(max)");
@@ -426,6 +603,8 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
 
                     b.HasIndex("EmployerId");
 
@@ -564,6 +743,9 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("JobApplicationId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("JobId")
                         .HasColumnType("int");
 
@@ -574,6 +756,8 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("JobApplicationId");
 
                     b.HasIndex("JobId");
 
@@ -838,6 +1022,17 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Navigation("JobApplication");
                 });
 
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Branch", b =>
+                {
+                    b.HasOne("AI_powerd_job_search_management_system.Models.Company", "Company")
+                        .WithMany("Branches")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.CandidateSkill", b =>
                 {
                     b.HasOne("AI_powerd_job_search_management_system.Models.Resume", "Resume")
@@ -868,6 +1063,44 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Navigation("Resume");
                 });
 
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.CompanyFollow", b =>
+                {
+                    b.HasOne("AI_powerd_job_search_management_system.Models.Company", "Company")
+                        .WithMany("Followers")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AI_powerd_job_search_management_system.Models.ApplicationUser", "JobSeekerUser")
+                        .WithMany()
+                        .HasForeignKey("JobSeekerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("JobSeekerUser");
+                });
+
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.CompanyReview", b =>
+                {
+                    b.HasOne("AI_powerd_job_search_management_system.Models.Company", "Company")
+                        .WithMany("Reviews")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AI_powerd_job_search_management_system.Models.ApplicationUser", "JobSeekerUser")
+                        .WithMany()
+                        .HasForeignKey("JobSeekerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("JobSeekerUser");
+                });
+
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Education", b =>
                 {
                     b.HasOne("AI_powerd_job_search_management_system.Models.Resume", "Resume")
@@ -887,6 +1120,12 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AI_powerd_job_search_management_system.Models.Branch", "Branch")
+                        .WithMany("Employers")
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("AI_powerd_job_search_management_system.Models.Company", "Company")
                         .WithMany("Employers")
                         .HasForeignKey("CompanyId")
@@ -894,6 +1133,8 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
+
+                    b.Navigation("Branch");
 
                     b.Navigation("Company");
                 });
@@ -931,13 +1172,38 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Navigation("JobApplication");
                 });
 
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.InterviewMessage", b =>
+                {
+                    b.HasOne("AI_powerd_job_search_management_system.Models.JobApplication", "JobApplication")
+                        .WithMany()
+                        .HasForeignKey("JobApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AI_powerd_job_search_management_system.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("JobApplication");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Job", b =>
                 {
+                    b.HasOne("AI_powerd_job_search_management_system.Models.Branch", "Branch")
+                        .WithMany("Jobs")
+                        .HasForeignKey("BranchId");
+
                     b.HasOne("AI_powerd_job_search_management_system.Models.Employer", "Employer")
                         .WithMany("Jobs")
                         .HasForeignKey("EmployerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Branch");
 
                     b.Navigation("Employer");
                 });
@@ -1026,6 +1292,10 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AI_powerd_job_search_management_system.Models.JobApplication", "JobApplication")
+                        .WithMany()
+                        .HasForeignKey("JobApplicationId");
+
                     b.HasOne("AI_powerd_job_search_management_system.Models.Job", "Job")
                         .WithMany()
                         .HasForeignKey("JobId");
@@ -1033,6 +1303,8 @@ namespace AI_powerd_job_search_management_system.Migrations
                     b.Navigation("ApplicationUser");
 
                     b.Navigation("Job");
+
+                    b.Navigation("JobApplication");
                 });
 
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Project", b =>
@@ -1127,9 +1399,22 @@ namespace AI_powerd_job_search_management_system.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Company", b =>
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Branch", b =>
                 {
                     b.Navigation("Employers");
+
+                    b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Company", b =>
+                {
+                    b.Navigation("Branches");
+
+                    b.Navigation("Employers");
+
+                    b.Navigation("Followers");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("AI_powerd_job_search_management_system.Models.Employer", b =>

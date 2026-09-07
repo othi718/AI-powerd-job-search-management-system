@@ -27,7 +27,8 @@ else
                     <th>Resume</th>
                     <th>Applied</th>
                     <th>Match</th>
-                    <th class="pe-4">Status</th>
+                    <th>Status</th>
+                    <th class="pe-4">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,7 +37,10 @@ else
                     <tr>
                         <td class="ps-4 fw-semibold">@app.JobSeeker?.ApplicationUser?.FullName</td>
                         <td class="text-muted">@app.JobSeeker?.ApplicationUser?.Email</td>
-                        <td><a asp-controller="Files" asp-action="DownloadResume" asp-route-id="@app.ResumeId" class="btn btn-pill btn-mint-outline btn-sm">Download</a></td>
+                        <td>
+                            <a asp-controller="Files" asp-action="Preview" asp-route-id="@app.ResumeId" target="_blank" class="btn btn-pill btn-mint-outline btn-sm">View</a>
+                            <a asp-controller="Files" asp-action="DownloadResume" asp-route-id="@app.ResumeId" class="btn btn-pill btn-ghost btn-sm">Download</a>
+                        </td>
                         <td class="text-muted">@app.AppliedAt.ToString("dd MMM yyyy")</td>
                         <td>
                             @app.MatchScore%
@@ -44,9 +48,14 @@ else
                             {
                                 <br />
                                 <small class="text-muted">Missing: @app.AIAnalysis.MissingSkills</small>
+                                @if (!string.IsNullOrWhiteSpace(app.AIAnalysis.AIInsight))
+                                {
+                                    <br />
+                                    <small class="fst-italic">"@app.AIAnalysis.AIInsight"</small>
+                                }
                             }
                         </td>
-                        <td class="pe-4">
+                        <td>
                             <form asp-action="UpdateApplicationStatus" method="post" class="d-flex gap-1">
                                 <input type="hidden" name="applicationId" value="@app.Id" />
                                 <select name="status" class="form-select form-select-sm" style="width:auto;">
@@ -57,6 +66,10 @@ else
                                 </select>
                                 <button type="submit" class="btn btn-pill btn-ghost btn-sm">Update</button>
                             </form>
+                        </td>
+                        <td class="pe-4 d-flex gap-1">
+                            <a asp-action="ScheduleInterview" asp-route-applicationId="@app.Id" class="btn btn-pill btn-mint-outline btn-sm">Interview</a>
+                            <a asp-controller="Messages" asp-action="Discuss" asp-route-applicationId="@app.Id" class="btn btn-pill btn-ghost btn-sm">Discuss</a>
                         </td>
                     </tr>
                 }

@@ -1,0 +1,273 @@
+﻿@model AI_powerd_job_search_management_system.Models.Branch
+
+@{
+    ViewData["Title"] = "Branch Details";
+
+    var approvedStaff =
+        ViewBag.ApprovedStaff as
+        List<AI_powerd_job_search_management_system.Models.Employer>
+        ?? new List<AI_powerd_job_search_management_system.Models.Employer>();
+
+    var pendingStaff =
+        ViewBag.PendingStaff as
+        List<AI_powerd_job_search_management_system.Models.Employer>
+        ?? new List<AI_powerd_job_search_management_system.Models.Employer>();
+
+    var jobs =
+        ViewBag.Jobs as
+        List<AI_powerd_job_search_management_system.Models.Job>
+        ?? new List<AI_powerd_job_search_management_system.Models.Job>();
+}
+
+<div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div>
+        <a asp-action="Branches"
+           class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to branches
+        </a>
+
+        <h2 class="mt-2">@Model.Name</h2>
+
+        <p class="mb-0">
+            <i class="bi bi-geo-alt me-1"></i>
+            @(Model.Location ?? "No location set")
+        </p>
+    </div>
+
+    <a asp-action="CreateJob"
+       class="btn btn-pill btn-ink">
+        <i class="bi bi-plus-lg me-1"></i>
+        Post a job
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card-clean h-100">
+            <p class="text-muted small mb-1">Approved staff</p>
+            <h3 class="mb-0">@approvedStaff.Count / 3</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card-clean h-100">
+            <p class="text-muted small mb-1">Pending requests</p>
+            <h3 class="mb-0">@pendingStaff.Count</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card-clean h-100">
+            <p class="text-muted small mb-1">Jobs posted</p>
+            <h3 class="mb-0">@jobs.Count</h3>
+        </div>
+    </div>
+</div>
+
+<div class="card-clean p-0 mb-4">
+    <div class="p-4 border-bottom">
+        <h4 class="mb-1">Pending employee requests</h4>
+        <p class="text-muted mb-0">
+            Employees who selected @Model.Name when requesting to join.
+        </p>
+    </div>
+
+    @if (!pendingStaff.Any())
+    {
+        <div class="text-center py-5">
+            <p class="text-muted mb-0">
+                No pending requests for this branch.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr class="text-muted small text-uppercase">
+                        <th class="ps-4">Name</th>
+                        <th>Email</th>
+                        <th>Requested position</th>
+                        <th>Job title</th>
+                        <th class="pe-4">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var employee in pendingStaff)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-semibold">
+                                @employee.ApplicationUser?.FullName
+                            </td>
+
+                            <td class="text-muted">
+                                @employee.ApplicationUser?.Email
+                            </td>
+
+                            <td>@employee.Position</td>
+
+                            <td>@employee.JobTitle</td>
+
+                            <td class="pe-4">
+                                <div class="d-flex gap-1">
+                                    @if (approvedStaff.Count < 3)
+                                    {
+                                        <form asp-action="ApproveStaff"
+                                              method="post"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="employerId"
+                                                   value="@employee.Id" />
+
+                                            <input type="hidden"
+                                                   name="branchId"
+                                                   value="@Model.Id" />
+
+                                            <button type="submit"
+                                                    class="btn btn-pill btn-ink btn-sm">
+                                                Approve
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-pill btn-ghost btn-sm"
+                                                disabled>
+                                            Branch full
+                                        </button>
+                                    }
+
+                                    <form asp-action="RejectStaff"
+                                          method="post"
+                                          class="d-inline">
+
+                                        <input type="hidden"
+                                               name="employerId"
+                                               value="@employee.Id" />
+
+                                        <input type="hidden"
+                                               name="branchId"
+                                               value="@Model.Id" />
+
+                                        <button type="submit"
+                                                class="btn btn-pill btn-ghost btn-sm text-danger">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card-clean p-0 mb-4">
+    <div class="p-4 border-bottom">
+        <h4 class="mb-1">Approved branch management</h4>
+        <p class="text-muted mb-0">
+            These employees can post jobs for this branch.
+        </p>
+    </div>
+
+    @if (!approvedStaff.Any())
+    {
+        <div class="text-center py-5">
+            <p class="text-muted mb-0">
+                No employees have been approved for this branch.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr class="text-muted small text-uppercase">
+                        <th class="ps-4">Name</th>
+                        <th>Email</th>
+                        <th>Position</th>
+                        <th class="pe-4">Job title</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var employee in approvedStaff)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-semibold">
+                                @employee.ApplicationUser?.FullName
+                            </td>
+
+                            <td class="text-muted">
+                                @employee.ApplicationUser?.Email
+                            </td>
+
+                            <td>@employee.Position</td>
+
+                            <td class="pe-4">@employee.JobTitle</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card-clean p-0">
+    <div class="p-4 border-bottom">
+        <h4 class="mb-1">Branch jobs</h4>
+        <p class="text-muted mb-0">
+            Jobs posted under @Model.Name.
+        </p>
+    </div>
+
+    @if (!jobs.Any())
+    {
+        <div class="text-center py-5">
+            <p class="text-muted mb-0">
+                No jobs have been posted for this branch.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr class="text-muted small text-uppercase">
+                        <th class="ps-4">Job</th>
+                        <th>Posted by</th>
+                        <th>Status</th>
+                        <th class="pe-4">Posted</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var job in jobs)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-semibold">@job.Title</td>
+
+                            <td>
+                                @job.Employer?.ApplicationUser?.FullName
+                            </td>
+
+                            <td>@job.Status</td>
+
+                            <td class="pe-4 text-muted">
+                                @job.PostedAt.ToString("dd MMM yyyy")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

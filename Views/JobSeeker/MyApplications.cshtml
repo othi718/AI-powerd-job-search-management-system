@@ -25,7 +25,8 @@ else
                     <th>Company</th>
                     <th>Applied</th>
                     <th>Match</th>
-                    <th class="pe-4">Status</th>
+                    <th>Status</th>
+                    <th class="pe-4">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,11 +36,24 @@ else
                         <td class="ps-4 fw-semibold">@app.Job?.Title</td>
                         <td class="text-muted">@app.Job?.Employer?.Company?.Name</td>
                         <td class="text-muted">@app.AppliedAt.ToString("dd MMM yyyy")</td>
-                        <td>@app.MatchScore%</td>
-                        <td class="pe-4">
+                        <td>
+                            @app.MatchScore%
+                            @if (app.AIAnalysis != null && !string.IsNullOrWhiteSpace(app.AIAnalysis.AIInsight))
+                            {
+                                <br />
+                                <small class="text-muted fst-italic">"@app.AIAnalysis.AIInsight"</small>
+                            }
+                        </td>
+                        <td>
                             <span class="badge-pill @(app.Status == AI_powerd_job_search_management_system.Models.ApplicationStatus.Accepted ? "badge-open" : "badge-closed")">
                                 @app.Status
                             </span>
+                        </td>
+                        <td class="pe-4 d-flex gap-1">
+                            @if ((DateTime.UtcNow - app.AppliedAt).TotalHours <= 24)
+                            {
+                                <a asp-action="EditApplication" asp-route-id="@app.Id" class="btn btn-pill btn-ghost btn-sm">Edit</a>
+                            }
                         </td>
                     </tr>
                 }

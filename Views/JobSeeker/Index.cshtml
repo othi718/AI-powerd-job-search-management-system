@@ -64,8 +64,10 @@
                             <div class="job-company-badge">@(job.Employer?.Company?.Name?.Substring(0, 1) ?? "?")</div>
                             <div class="flex-grow-1">
                                 <h5>@job.Title</h5>
-                                <p class="job-meta mb-2">@job.Employer?.Company?.Name &middot; @job.Location</p>
-                                <p class="small text-muted mb-3">
+                                <p class="job-meta mb-2">
+                                    <a asp-controller="Company" asp-action="Details" asp-route-id="@job.Employer?.CompanyId">@job.Employer?.Company?.Name</a>
+                                    &middot; @job.Location
+                                </p>                                <p class="small text-muted mb-3">
                                     @(job.Description.Length > 110 ? job.Description.Substring(0, 110) + "..." : job.Description)
                                 </p>
                                 <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-pill btn-mint-outline btn-sm">View details</a>

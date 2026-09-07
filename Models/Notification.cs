@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AI_powerd_job_search_management_system.Models;
+
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_powerd_job_search_management_system.Models
@@ -20,5 +22,8 @@ namespace AI_powerd_job_search_management_system.Models
         public int? JobId { get; set; }
         [ForeignKey(nameof(JobId))]
         public Job? Job { get; set; }
+        public int? JobApplicationId { get; set; }
+        [ForeignKey(nameof(JobApplicationId))]
+        public JobApplication? JobApplication { get; set; }
     }
 }

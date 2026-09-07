@@ -1,0 +1,35 @@
+﻿@model List<AI_powerd_job_search_management_system.Models.SavedJob>
+
+@{
+    ViewData["Title"] = "Saved Jobs";
+}
+
+<div class="page-header">
+    <h2>Saved jobs</h2>
+    <p>@Model.Count() saved</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-clean text-center py-5">
+        <p class="mb-0 text-muted">No saved jobs yet.</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var s in Model)
+        {
+            <div class="col-md-6">
+                <div class="card-clean card-hover job-card h-100 d-flex flex-row gap-3">
+                    <div class="job-company-badge">@(s.Job?.Employer?.Company?.Name?.Substring(0, 1) ?? "?")</div>
+                    <div class="flex-grow-1">
+                        <h5>@s.Job?.Title</h5>
+                        <p class="job-meta mb-2">@s.Job?.Employer?.Company?.Name &middot; @s.Job?.Location</p>
+                        <a asp-action="Details" asp-route-id="@s.JobId" class="btn btn-pill btn-mint-outline btn-sm">View details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

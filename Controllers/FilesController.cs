@@ -21,10 +21,10 @@ namespace AI_powerd_job_search_management_system.Controllers
             _env = env;
         }
 
-        public async Task<IActionResult> DownloadResume(int id)
+        private async Task<(Resume? resume, bool authorized)> AuthorizeResumeAsync(int id)
         {
             var resume = await _context.Resumes.Include(r => r.JobSeeker).FirstOrDefaultAsync(r => r.Id == id);
-            if (resume == null) return NotFound();
+            if (resume == null) return (null, false);
 
             var userId = _userManager.GetUserId(User);
             bool isOwner = resume.JobSeeker!.ApplicationUserId == userId;
@@ -32,7 +32,14 @@ namespace AI_powerd_job_search_management_system.Controllers
                 .Include(a => a.Job).ThenInclude(j => j!.Employer)
                 .AnyAsync(a => a.ResumeId == id && a.Job!.Employer!.ApplicationUserId == userId);
 
-            if (!isOwner && !isEmployerOfApplicant) return Forbid();
+            return (resume, isOwner || isEmployerOfApplicant);
+        }
+
+        public async Task<IActionResult> DownloadResume(int id)
+        {
+            var (resume, authorized) = await AuthorizeResumeAsync(id);
+            if (resume == null) return NotFound();
+            if (!authorized) return Forbid();
 
             var fullPath = Path.Combine(_env.ContentRootPath, "UploadedFiles", "Resumes", resume.FilePath);
             if (!System.IO.File.Exists(fullPath)) return NotFound();
@@ -42,6 +49,43 @@ namespace AI_powerd_job_search_management_system.Controllers
                 : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
             return PhysicalFile(fullPath, contentType, resume.OriginalFileName);
+        }
+
+        // Raw bytes, no attachment header — used internally by the Preview page (embed / fetch)
+        public async Task<IActionResult> RawFile(int id)
+        {
+            var (resume, authorized) = await AuthorizeResumeAsync(id);
+            if (resume == null) return NotFound();
+            if (!authorized) return Forbid();
+
+            var fullPath = Path.Combine(_env.ContentRootPath, "UploadedFiles", "Resumes", resume.FilePath);
+            if (!System.IO.File.Exists(fullPath)) return NotFound();
+
+            var contentType = resume.FilePath.EndsWith(".pdf")
+                ? "application/pdf"
+                : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+            return PhysicalFile(fullPath, contentType);
+        }
+
+        // The combined "View" page: rendered CV + structured details, all in one place
+        public async Task<IActionResult> Preview(int id)
+        {
+            var (_, authorized) = await AuthorizeResumeAsync(id);
+            if (!authorized) return Forbid();
+
+            var resume = await _context.Resumes
+                .Include(r => r.Educations)
+                .Include(r => r.Experiences)
+                .Include(r => r.Certifications)
+                .Include(r => r.Projects)
+                .Include(r => r.ExtracurricularActivities)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (resume == null) return NotFound();
+
+            ViewBag.IsPdf = resume.FilePath.EndsWith(".pdf");
+            return View(resume);
         }
     }
 }

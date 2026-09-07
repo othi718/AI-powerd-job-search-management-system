@@ -1,0 +1,34 @@
+﻿@model List<AI_powerd_job_search_management_system.ViewComponents.MessageConversationInfo>
+
+@{
+    int totalUnread = Model.Sum(c => c.UnreadCount);
+}
+
+<div class="dropdown">
+    <a href="#" class="position-relative d-inline-flex align-items-center me-2" data-bs-toggle="dropdown" title="Messages">
+        <span style="font-size:1.25rem;">&#128172;</span>
+        @if (totalUnread > 0)
+        {
+            <span class="position-absolute badge rounded-pill bg-danger" style="top:-4px; right:-8px; font-size:0.65rem;">@totalUnread</span>
+        }
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 280px;">
+        @if (!Model.Any())
+        {
+            <li><span class="dropdown-item-text text-muted small">No new messages</span></li>
+        }
+        else
+        {
+            @foreach (var c in Model)
+            {
+                <li>
+                    <a class="dropdown-item" asp-controller="Messages" asp-action="Chat" asp-route-applicationId="@c.JobApplicationId">
+                        <strong>@c.JobTitle</strong>
+                        <span class="badge-pill badge-open ms-1">@c.UnreadCount</span>
+                        <div class="text-muted small text-truncate" style="max-width: 240px;">@c.LastMessage</div>
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</div>

@@ -651,3 +651,8 @@ input:-webkit-autofill:active {
     border-radius: 999px;
     font-size: 0.85rem;
 }
+@media print {
+    .no-print, .site-navbar, .site-footer {
+        display: none !important;
+    }
+}

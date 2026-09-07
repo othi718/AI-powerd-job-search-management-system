@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AI_powerd_job_search_management_system.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_powerd_job_search_management_system.Models
@@ -18,6 +19,7 @@ namespace AI_powerd_job_search_management_system.Models
         public double SkillMatchScore { get; set; }
         public double EducationExperienceScore { get; set; }
         public double OverallScore { get; set; }
+        public string? AIInsight { get; set; }
 
         public DateTime AnalyzedAt { get; set; } = DateTime.UtcNow;
     }

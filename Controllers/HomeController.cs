@@ -31,7 +31,7 @@ namespace AI_powerd_job_search_management_system.Controllers
                 OpenJobsCount = await openApprovedJobs.CountAsync(),
                 ApprovedCompaniesCount = await _context.Companies.CountAsync(c => c.IsApproved),
                 JobSeekersCount = await _context.JobSeekers.CountAsync(),
-                SuccessfulHiresCount = await _context.JobApplications.CountAsync(a => a.Status == ApplicationStatus.Accepted),
+                SuccessfulHiresCount = await _context.JobApplications.CountAsync(a => a.Status == AI_powerd_job_search_management_system.Models.ApplicationStatus.Accepted),
 
                 FeaturedJobs = await openApprovedJobs
                     .OrderByDescending(j => j.PostedAt)

@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Add Branch";
+}
+
+<div class="page-header">
+    <h2>Add a new branch</h2>
+</div>
+
+<div class="card-clean" style="max-width: 480px;">
+    <form asp-action="CreateBranch" method="post">
+        <div class="mb-3">
+            <label class="form-label">Branch name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Chattogram Office" required />
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-pill btn-ink">Create branch</button>
+        <a asp-action="Branches" class="btn btn-ghost">Cancel</a>
+    </form>
+</div>

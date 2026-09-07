@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHttpClient<AI_powerd_job_search_management_system.Services.GeminiService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -58,6 +59,7 @@ using (var scope = app.Services.CreateScope())
 
     string adminEmail = "admin@smarthire.com";
     string adminPassword = "Admin@123";
+
 
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {

@@ -1,0 +1,94 @@
+﻿@model AI_powerd_job_search_management_system.Models.Resume
+@{
+    ViewData["Title"] = "CV Preview";
+    bool isPdf = ViewBag.IsPdf;
+}
+
+<div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div>
+        <h2>@Model.OriginalFileName</h2>
+        <p>Uploaded @Model.UploadedAt.ToString("dd MMM yyyy")</p>
+    </div>
+    <a asp-controller="Files" asp-action="DownloadResume" asp-route-id="@Model.Id" class="btn btn-pill btn-mint-outline">Download</a>
+</div>
+
+<div class="card-clean mb-4 p-2">
+    @if (isPdf)
+    {
+        <embed src="/Files/RawFile/@Model.Id" type="application/pdf" width="100%" height="700px" style="border-radius:8px;" />
+    }
+    else
+    {
+        <div id="docx-container" style="max-height:700px; overflow-y:auto; padding:1rem;"></div>
+        <p id="docx-fallback" class="text-muted text-center py-4 d-none">
+            Preview unavailable for this file — please use Download to open it.
+        </p>
+    }
+</div>
+
+@if (Model.Educations.Any())
+{
+    <div class="card-clean mb-3">
+        <h5>Education</h5>
+        @foreach (var e in Model.Educations)
+        {
+            <p class="mb-1"><strong>@e.Institution</strong> — @e.Degree @(e.FieldOfStudy != null ? $"in {e.FieldOfStudy}" : "")</p>
+        }
+    </div>
+}
+@if (Model.Experiences.Any())
+{
+    <div class="card-clean mb-3">
+        <h5>Experience</h5>
+        @foreach (var e in Model.Experiences)
+        {
+            <p class="mb-1"><strong>@e.JobTitle</strong> at @e.CompanyName<br /><span class="text-muted small">@e.Description</span></p>
+        }
+    </div>
+}
+@if (Model.Certifications.Any())
+{
+    <div class="card-clean mb-3">
+        <h5>Certifications</h5>
+        @foreach (var c in Model.Certifications)
+        {
+            <p class="mb-1">@c.Name — @c.IssuingOrganization</p>
+        }
+    </div>
+}
+@if (Model.Projects.Any())
+{
+    <div class="card-clean mb-3">
+        <h5>Projects</h5>
+        @foreach (var p in Model.Projects)
+        {
+            <p class="mb-1"><strong>@p.Title</strong> — @p.TechnologiesUsed<br /><span class="text-muted small">@p.Description</span></p>
+        }
+    </div>
+}
+@if (Model.ExtracurricularActivities.Any())
+{
+    <div class="card-clean mb-3">
+        <h5>Extracurricular Activities</h5>
+        @foreach (var a in Model.ExtracurricularActivities)
+        {
+            <p class="mb-1">@a.ActivityName — @a.RoleOrPosition</p>
+        }
+    </div>
+}
+
+@if (!isPdf)
+{
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.0/dist/docx-preview.min.js"></script>
+        <script>
+            fetch('/Files/RawFile/@Model.Id')
+                .then(r => r.blob())
+                .then(blob => docx.renderAsync(blob, document.getElementById('docx-container')))
+                .catch(() => {
+                    document.getElementById('docx-container').classList.add('d-none');
+                    document.getElementById('docx-fallback').classList.remove('d-none');
+                });
+        </script>
+    }
+}

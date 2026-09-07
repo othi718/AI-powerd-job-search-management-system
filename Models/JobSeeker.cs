@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using AI_powerd_job_search_management_system.Models;
+
 using Microsoft.AspNetCore.Builder;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_powerd_job_search_management_system.Models
 {

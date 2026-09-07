@@ -35,6 +35,11 @@
             <textarea asp-for="Description" class="form-control" rows="5"></textarea>
             <span asp-validation-for="Description" class="text-danger small"></span>
         </div>
+        <div class="mb-3"><label class="form-label">Education Requirement</label><input asp-for="EducationRequirement" class="form-control" placeholder="e.g. Bachelor's in CSE" /></div>
+        <div class="mb-3"><label class="form-label">Experience Requirement</label><input asp-for="ExperienceRequirement" class="form-control" placeholder="e.g. At least 2 years" /></div>
+        <div class="mb-3"><label class="form-label">Additional Requirements</label><textarea asp-for="AdditionalRequirements" class="form-control" rows="2"></textarea></div>
+        <div class="mb-3"><label class="form-label">Responsibilities</label><textarea asp-for="Responsibilities" class="form-control" rows="3"></textarea></div>
+        <div class="mb-3"><label class="form-label">Benefits</label><textarea asp-for="Benefits" class="form-control" rows="2" placeholder="e.g. Health insurance, festival bonus"></textarea></div>
         <div class="mb-3">
             <label asp-for="RequiredSkills" class="form-label"></label>
 
@@ -54,10 +59,23 @@
             <label asp-for="Location" class="form-label"></label>
             <input asp-for="Location" class="form-control" />
         </div>
+        <div class="mb-3">
+            <label class="form-label">Branch</label>
+            <select asp-for="BranchId" class="form-select">
+                @foreach (var b in (List<AI_powerd_job_search_management_system.Models.Branch>)ViewBag.Branches)
+                {
+                    <option value="@b.Id">@b.Name</option>
+                }
+            </select>
+        </div>
 
         <div class="mb-4">
             <label asp-for="SalaryRange" class="form-label"></label>
             <input asp-for="SalaryRange" class="form-control" />
+        </div>
+        <div class="mb-4">
+            <label asp-for="Deadline" class="form-label"></label>
+            <input asp-for="Deadline" class="form-control" />
         </div>
 
         <button type="submit" class="btn btn-pill btn-ink">Post job</button>

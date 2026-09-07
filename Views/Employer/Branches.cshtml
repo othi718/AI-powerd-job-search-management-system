@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "My Branches";
+
+    var branchInfo =
+        (List<(
+            AI_powerd_job_search_management_system.Models.Branch branch,
+            int staffCount,
+            int jobCount
+        )>)ViewBag.BranchInfo;
+
+    bool isOwner = ViewBag.IsOwner == true;
+}
+
+<div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div>
+        <h2>
+            @(isOwner ? "My branches" : "My branch")
+        </h2>
+
+        @if (isOwner)
+        {
+            <p>@branchInfo.Count branch(es)</p>
+        }
+        else
+        {
+            <p>Your assigned company branch</p>
+        }
+    </div>
+
+    @if (isOwner)
+    {
+        <a asp-action="CreateBranch"
+           class="btn btn-pill btn-ink">
+            + Add branch
+        </a>
+    }
+</div>
+
+@if (!branchInfo.Any())
+{
+    <div class="card-clean text-center py-5">
+        <i class="bi bi-building fs-1 text-muted d-block mb-2"></i>
+
+        <p class="text-muted mb-0">
+            No assigned branch was found.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var (branch, staffCount, jobCount) in branchInfo)
+        {
+            <div class="col-md-4">
+                <a asp-action="BranchDetails"
+                   asp-route-id="@branch.Id"
+                   class="text-decoration-none text-dark">
+
+                    <div class="card-clean card-hover h-100">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5>@branch.Name</h5>
+
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>
+
+                            @(branch.Location ?? "No location set")
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>@staffCount</strong>
+                            / 3 approved staff
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>@jobCount</strong>
+                            job(s) posted
+                        </p>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}

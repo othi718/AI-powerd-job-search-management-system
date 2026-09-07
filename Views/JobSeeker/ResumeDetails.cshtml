@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Resume Details";
+    var resume = (AI_powerd_job_search_management_system.Models.Resume)ViewBag.Resume;
+    var educations = (List<AI_powerd_job_search_management_system.Models.Education>)ViewBag.Educations;
+    var experiences = (List<AI_powerd_job_search_management_system.Models.Experience>)ViewBag.Experiences;
+    var certifications = (List<AI_powerd_job_search_management_system.Models.Certification>)ViewBag.Certifications;
+    var projects = (List<AI_powerd_job_search_management_system.Models.Project>)ViewBag.Projects;
+    var activities = (List<AI_powerd_job_search_management_system.Models.ExtracurricularActivity>)ViewBag.Activities;
+}
+
+<div class="page-header">
+    <h2>Resume Details</h2>
+    <p>@resume.OriginalFileName</p>
+</div>
+
+<!-- Education -->
+<div class="card-clean mb-4">
+    <h5 class="mb-3">Education</h5>
+    @foreach (var e in educations)
+    {
+        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+            <div>
+                <strong>@e.Institution</strong> — @e.Degree @(e.FieldOfStudy != null ? $"in {e.FieldOfStudy}" : "")
+                <div class="text-muted small">@e.StartDate?.ToString("yyyy") - @(e.EndDate?.ToString("yyyy") ?? "Present")</div>
+            </div>
+            <form asp-action="DeleteEducation" method="post">
+                <input type="hidden" name="id" value="@e.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
+                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+            </form>
+        </div>
+    }
+    <form asp-action="AddEducation" method="post" class="row g-2 mt-3">
+        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <div class="col-md-4"><input name="institution" class="form-control" placeholder="Institution" required /></div>
+        <div class="col-md-3"><input name="degree" class="form-control" placeholder="Degree" /></div>
+        <div class="col-md-3"><input name="fieldOfStudy" class="form-control" placeholder="Field of study" /></div>
+        <div class="col-md-1"><input type="date" name="startDate" class="form-control" /></div>
+        <div class="col-md-1"><input type="date" name="endDate" class="form-control" /></div>
+        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Education</button></div>
+    </form>
+</div>
+
+<!-- Experience -->
+<div class="card-clean mb-4">
+    <h5 class="mb-3">Experience</h5>
+    @foreach (var e in experiences)
+    {
+        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+            <div>
+                <strong>@e.JobTitle</strong> at @e.CompanyName
+                <div class="text-muted small">@e.StartDate?.ToString("MMM yyyy") - @(e.EndDate?.ToString("MMM yyyy") ?? "Present")</div>
+                @if (!string.IsNullOrWhiteSpace(e.Description))
+                {
+                    <div class="small">@e.Description</div>
+                }
+            </div>
+            <form asp-action="DeleteExperience" method="post">
+                <input type="hidden" name="id" value="@e.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
+                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+            </form>
+        </div>
+    }
+    <form asp-action="AddExperience" method="post" class="row g-2 mt-3">
+        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <div class="col-md-3"><input name="companyName" class="form-control" placeholder="Company" required /></div>
+        <div class="col-md-3"><input name="jobTitle" class="form-control" placeholder="Job Title" required /></div>
+        <div class="col-md-2"><input type="date" name="startDate" class="form-control" /></div>
+        <div class="col-md-2"><input type="date" name="endDate" class="form-control" /></div>
+        <div class="col-md-2"><input name="description" class="form-control" placeholder="Description" /></div>
+        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Experience</button></div>
+    </form>
+</div>
+
+<!-- Certifications -->
+<div class="card-clean mb-4">
+    <h5 class="mb-3">Certifications</h5>
+    @foreach (var c in certifications)
+    {
+        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+            <div><strong>@c.Name</strong> — @c.IssuingOrganization <span class="text-muted small">@c.DateIssued?.ToString("MMM yyyy")</span></div>
+            <form asp-action="DeleteCertification" method="post">
+                <input type="hidden" name="id" value="@c.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
+                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+            </form>
+        </div>
+    }
+    <form asp-action="AddCertification" method="post" class="row g-2 mt-3">
+        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <div class="col-md-4"><input name="name" class="form-control" placeholder="Certification name" required /></div>
+        <div class="col-md-4"><input name="issuingOrganization" class="form-control" placeholder="Issuing organization" /></div>
+        <div class="col-md-2"><input type="date" name="dateIssued" class="form-control" /></div>
+        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Certification</button></div>
+    </form>
+</div>
+
+<!-- Projects -->
+<div class="card-clean mb-4">
+    <h5 class="mb-3">Projects</h5>
+    @foreach (var p in projects)
+    {
+        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+            <div><strong>@p.Title</strong><div class="small text-muted">@p.TechnologiesUsed</div><div class="small">@p.Description</div></div>
+            <form asp-action="DeleteProject" method="post">
+                <input type="hidden" name="id" value="@p.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
+                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+            </form>
+        </div>
+    }
+    <form asp-action="AddProject" method="post" class="row g-2 mt-3">
+        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <div class="col-md-4"><input name="title" class="form-control" placeholder="Project title" required /></div>
+        <div class="col-md-4"><input name="technologiesUsed" class="form-control" placeholder="Technologies used" /></div>
+        <div class="col-md-4"><input name="description" class="form-control" placeholder="Description" /></div>
+        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Project</button></div>
+    </form>
+</div>
+
+<!-- Extracurricular Activities -->
+<div class="card-clean mb-4">
+    <h5 class="mb-3">Extracurricular Activities</h5>
+    @foreach (var a in activities)
+    {
+        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+            <div><strong>@a.ActivityName</strong> — @a.RoleOrPosition<div class="small">@a.Description</div></div>
+            <form asp-action="DeleteActivity" method="post">
+                <input type="hidden" name="id" value="@a.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
+                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+            </form>
+        </div>
+    }
+    <form asp-action="AddActivity" method="post" class="row g-2 mt-3">
+        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <div class="col-md-4"><input name="activityName" class="form-control" placeholder="Activity" required /></div>
+        <div class="col-md-4"><input name="roleOrPosition" class="form-control" placeholder="Role / position" /></div>
+        <div class="col-md-4"><input name="description" class="form-control" placeholder="Description" /></div>
+        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Activity</button></div>
+    </form>
+</div>
+
+<a asp-action="MyResumes" class="btn btn-ghost">&larr; Back to My Resumes</a>

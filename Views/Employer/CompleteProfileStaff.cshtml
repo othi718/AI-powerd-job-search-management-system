@@ -1,0 +1,222 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.JoinCompanyViewModel
+
+@{
+    ViewData["Title"] = "Join a Company";
+}
+
+<div class="page-header">
+    <h2>Join an existing company</h2>
+    <p>
+        Search for a registered company and select the branch you want to join.
+    </p>
+</div>
+
+<div class="card-clean" style="max-width: 480px;">
+    <form asp-action="CompleteProfileStaff"
+          method="post"
+          id="joinCompanyForm">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger small mb-3"></div>
+
+        <div class="mb-3">
+            <label class="form-label">Company</label>
+
+            <input type="text"
+                   id="companySearch"
+                   class="form-control"
+                   list="companyList"
+                   autocomplete="off"
+                   placeholder="Type a company name..." />
+
+            <datalist id="companyList"></datalist>
+
+            <input asp-for="CompanyId"
+                   type="hidden"
+                   id="companyId" />
+
+            <span asp-validation-for="CompanyId"
+                  class="text-danger small"></span>
+
+            <small id="companyMessage"
+                   class="text-muted d-block mt-1">
+                Only companies registered in the system can be selected.
+            </small>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="BranchId" class="form-label">
+                Branch
+            </label>
+
+            <select asp-for="BranchId"
+                    id="branchSelect"
+                    class="form-select"
+                    disabled>
+                <option value="">
+                    -- Select a company first --
+                </option>
+            </select>
+
+            <span asp-validation-for="BranchId"
+                  class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Position" class="form-label"></label>
+
+            <select asp-for="Position" class="form-select">
+                <option value="HR">HR</option>
+                <option value="Manager">Manager</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <span asp-validation-for="Position"
+                  class="text-danger small"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="JobTitle" class="form-label"></label>
+
+            <input asp-for="JobTitle"
+                   class="form-control"
+                   placeholder="e.g. HR Executive" />
+
+            <span asp-validation-for="JobTitle"
+                  class="text-danger small"></span>
+        </div>
+
+        <button type="submit"
+                class="btn btn-pill btn-ink">
+            Send request
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const companies = @Html.Raw(ViewBag.CompaniesJson);
+
+        const companySearch =
+            document.getElementById("companySearch");
+
+        const companyList =
+            document.getElementById("companyList");
+
+        const companyId =
+            document.getElementById("companyId");
+
+        const branchSelect =
+            document.getElementById("branchSelect");
+
+        const companyMessage =
+            document.getElementById("companyMessage");
+
+        const joinCompanyForm =
+            document.getElementById("joinCompanyForm");
+
+        // Add company names to the browser suggestion list.
+        companies.forEach(company => {
+            const option = document.createElement("option");
+            option.value = company.Name;
+            companyList.appendChild(option);
+        });
+
+        function setCompanyAndBranches() {
+            const typedName =
+                companySearch.value.trim().toLowerCase();
+
+            const selectedCompany = companies.find(company =>
+                company.Name.trim().toLowerCase() === typedName
+            );
+
+            // Clear any previous company and branch selection.
+            companyId.value = "";
+
+            branchSelect.innerHTML =
+                '<option value="">-- Select a company first --</option>';
+
+            branchSelect.disabled = true;
+
+            // The typed company does not exist in the system.
+            if (!selectedCompany) {
+                if (companySearch.value.trim() !== "") {
+                    companyMessage.textContent =
+                        "Select a registered company from the suggestions.";
+
+                    companyMessage.className =
+                        "text-danger d-block mt-1";
+                } else {
+                    companyMessage.textContent =
+                        "Only companies registered in the system can be selected.";
+
+                    companyMessage.className =
+                        "text-muted d-block mt-1";
+                }
+
+                return;
+            }
+
+            // Store the real database CompanyId.
+            companyId.value = selectedCompany.Id;
+
+            // Enable and populate the branch dropdown.
+            branchSelect.disabled = false;
+
+            branchSelect.innerHTML =
+                '<option value="">-- Select a branch --</option>';
+
+            selectedCompany.Branches.forEach(branch => {
+                const option = document.createElement("option");
+                option.value = branch.Id;
+                option.textContent = branch.Name;
+                branchSelect.appendChild(option);
+            });
+
+            companyMessage.textContent =
+                selectedCompany.Name + " selected.";
+
+            companyMessage.className =
+                "text-success d-block mt-1";
+        }
+
+        companySearch.addEventListener(
+            "input",
+            setCompanyAndBranches
+        );
+
+        companySearch.addEventListener(
+            "change",
+            setCompanyAndBranches
+        );
+
+        joinCompanyForm.addEventListener(
+            "submit",
+            function (event) {
+                setCompanyAndBranches();
+
+                if (!companyId.value) {
+                    event.preventDefault();
+
+                    companyMessage.textContent =
+                        "Please select a registered company.";
+
+                    companyMessage.className =
+                        "text-danger d-block mt-1";
+
+                    companySearch.focus();
+                    return;
+                }
+
+                if (!branchSelect.value) {
+                    event.preventDefault();
+                    branchSelect.focus();
+                }
+            }
+        );
+    </script>
+}
