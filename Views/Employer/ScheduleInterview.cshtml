@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Schedule Interview";
+    var application = (AI_Powered_Smart_Job_Management_System.Models.JobApplication)ViewBag.Application;
+}
+
+<div class="page-header">
+    <h2>Schedule interview</h2>
+    <p>For: @application.Job?.Title</p>
+</div>
+
+<div class="card-clean" style="max-width: 480px;">
+    <form asp-action="ScheduleInterview" method="post">
+        <input type="hidden" name="applicationId" value="@application.Id" />
+        <div class="mb-3">
+            <label class="form-label">Date and time</label>
+            <input type="datetime-local" name="scheduledAt" class="form-control"
+                   value="@(application.Interview?.ScheduledAt.ToString("yyyy-MM-ddTHH:mm"))" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Location or link</label>
+            <input type="text" name="location" class="form-control" value="@application.Interview?.Location" />
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="3">@application.Interview?.Notes</textarea>
+        </div>
+        <button type="submit" class="btn btn-pill btn-ink">Send invitation</button>
+        <a asp-action="Applicants" asp-route-jobId="@application.JobId" class="btn btn-ghost">Cancel</a>
+    </form>
+</div>

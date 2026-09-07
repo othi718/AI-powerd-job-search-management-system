@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Edit Application";
+    var application = (AI_Powered_Smart_Job_Management_System.Models.JobApplication)ViewBag.Application;
+    var resumes = (List<AI_powerd_job_search_management_system.Models.Resume>)ViewBag.Resumes;
+}
+
+<div class="page-header">
+    <h2>Change resume</h2>
+    <p>You can change your resume within 24 hours of applying.</p>
+</div>
+
+<div class="card-clean" style="max-width: 480px;">
+    <form asp-action="EditApplication" method="post">
+        <input type="hidden" name="id" value="@application.Id" />
+        <div class="mb-4">
+            <label class="form-label">Choose a resume</label>
+            <select name="resumeId" class="form-select">
+                @foreach (var r in resumes)
+                {
+                    <option value="@r.Id" selected="@(r.Id == application.ResumeId)">@r.OriginalFileName</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-pill btn-ink">Save changes</button>
+        <a asp-action="MyApplications" class="btn btn-ghost">Cancel</a>
+    </form>
+</div>

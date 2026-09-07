@@ -1,0 +1,47 @@
+﻿@model List<AI_powerd_job_search_management_system.Models.Employer>
+@{
+    ViewData["Title"] = "Pending Staff Requests";
+}
+
+<div class="page-header">
+    <h2>Pending staff requests</h2>
+    <p>@ViewBag.ApprovedCount / 3 approved for this branch</p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-clean text-center py-5">
+        <p class="mb-0 text-muted">No pending requests.</p>
+    </div>
+}
+else
+{
+    <div class="card-clean p-0">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr class="text-muted small text-uppercase">
+                    <th class="ps-4">Name</th>
+                    <th>Email</th>
+                    <th>Position</th>
+                    <th>Job Title</th>
+                    <th class="pe-4">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model)
+                {
+                    <tr>
+                        <td class="ps-4 fw-semibold">@e.ApplicationUser?.FullName</td>
+                        <td class="text-muted">@e.ApplicationUser?.Email</td>
+                        <td>@e.Position</td>
+                        <td>@e.JobTitle</td>
+                        <td class="pe-4 d-flex gap-1">
+                            <form asp-action="ApproveStaff" method="post"><input type="hidden" name="employerId" value="@e.Id" /><button class="btn btn-pill btn-ink btn-sm">Approve</button></form>
+                            <form asp-action="RejectStaff" method="post"><input type="hidden" name="employerId" value="@e.Id" /><button class="btn btn-pill btn-ghost btn-sm text-danger">Reject</button></form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,4 +1,4 @@
-﻿@model List<AI_powerd_job_search_management_system.Models.JobApplication>
+﻿@model List<AI_Powered_Smart_Job_Management_System.Models.JobApplication>
 
 @{
     ViewData["Title"] = "My Applications";
@@ -26,6 +26,8 @@ else
                     <th>Applied</th>
                     <th>Match</th>
                     <th class="pe-4">Status</th>
+                    <th>Edit</th>
+                  
                 </tr>
             </thead>
             <tbody>
@@ -37,9 +39,16 @@ else
                         <td class="text-muted">@app.AppliedAt.ToString("dd MMM yyyy")</td>
                         <td>@app.MatchScore%</td>
                         <td class="pe-4">
-                            <span class="badge-pill @(app.Status == AI_powerd_job_search_management_system.Models.ApplicationStatus.Accepted ? "badge-open" : "badge-closed")">
+                            <span class="badge-pill @(app.Status == AI_Powered_Smart_Job_Management_System.Models.ApplicationStatus.Accepted ? "badge-open" : "badge-closed")">
                                 @app.Status
                             </span>
+                        </td>
+                        <td>
+                            @if ((DateTime.UtcNow - app.AppliedAt).TotalHours <= 24)
+                            {
+                                <a asp-action="EditApplication" asp-route-id="@app.Id" class="btn btn-pill btn-ghost btn-sm">Edit</a>
+                            <td><a asp-controller="Messages" asp-action="Discuss" asp-route-applicationId="@app.Id" class="btn btn-pill btn-ghost btn-sm">Discuss</a></td>
+                            }
                         </td>
                     </tr>
                 }

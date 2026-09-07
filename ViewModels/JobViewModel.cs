@@ -21,5 +21,8 @@ namespace AI_powerd_job_search_management_system.ViewModels
         public string RequiredSkills { get; set; } = string.Empty;
         [Required]
         public string Category { get; set; } = string.Empty;
+        [Display(Name = "Application Deadline")]
+        [DataType(DataType.Date)]
+        public DateTime? Deadline { get; set; }
     }
 }

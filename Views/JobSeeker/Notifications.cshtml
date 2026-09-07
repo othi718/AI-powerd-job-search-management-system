@@ -20,7 +20,15 @@ else
     <div class="d-flex flex-column gap-2">
         @foreach (var n in Model)
         {
-            @if (n.JobId != null)
+            @if (n.JobApplicationId != null)
+            {
+                <a asp-controller="Messages" asp-action="Discuss" asp-route-applicationId="@n.JobApplicationId"
+                   class="card-clean py-3 d-block" style="color: inherit;">
+                    <p class="mb-1">@n.Message</p>
+                    <small class="text-muted">@n.CreatedAt.ToString("dd MMM yyyy, h:mm tt")</small>
+                </a>
+            }
+            else if (n.JobId != null)
             {
                 <a asp-controller="JobSeeker" asp-action="Details" asp-route-id="@n.JobId"
                    class="card-clean py-3 d-block" style="color: inherit;">
@@ -32,7 +40,7 @@ else
             {
                 <div class="card-clean py-3">
                     <p class="mb-1">@n.Message</p>
-                    <small class="text-muted">@n.CreatedAt.ToString("dd MMM yyyy, h:mm tt")</small>
+                    <small class="text-muted">@n.CreatedAt.ToString("dd MMM yyyy, h:mm tt") &middot; Click to view details &rarr;</small>
                 </div>
             }
         }

@@ -59,6 +59,7 @@ using (var scope = app.Services.CreateScope())
     string adminEmail = "admin@smarthire.com";
     string adminPassword = "Admin@123";
 
+
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
         var adminUser = new ApplicationUser

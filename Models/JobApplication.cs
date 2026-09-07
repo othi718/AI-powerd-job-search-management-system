@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AI_powerd_job_search_management_system.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AI_powerd_job_search_management_system.Models
+namespace AI_Powered_Smart_Job_Management_System.Models
 {
     public enum ApplicationStatus { Pending, Shortlisted, Rejected, Accepted }
 
@@ -24,7 +25,7 @@ namespace AI_powerd_job_search_management_system.Models
         [ForeignKey(nameof(ResumeId))]
         public Resume? Resume { get; set; }
 
-        public double MatchScore { get; set; } = 0;
+        public double MatchScore { get; set; } = 0;   // overall AI matching percentage, e.g. 75.0
 
         public ApplicationStatus Status { get; set; } = ApplicationStatus.Pending;
         public DateTime AppliedAt { get; set; } = DateTime.UtcNow;

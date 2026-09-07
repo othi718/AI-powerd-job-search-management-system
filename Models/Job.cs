@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using AI_Powered_Smart_Job_Management_System.Models;
 using Microsoft.AspNetCore.Builder;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_powerd_job_search_management_system.Models
 {
@@ -26,6 +27,7 @@ namespace AI_powerd_job_search_management_system.Models
         public JobStatus Status { get; set; } = JobStatus.Open;
         public DateTime PostedAt { get; set; } = DateTime.UtcNow;
         public string Category { get; set; } = "Others";
+        public DateTime? Deadline { get; set; }
 
         public ICollection<JobSkill> JobSkills { get; set; } = new List<JobSkill>();
         public ICollection<JobApplication> Applications { get; set; } = new List<JobApplication>();

@@ -1,21 +1,35 @@
 ﻿@model AI_powerd_job_search_management_system.Models.Job
+
 @{
     ViewData["Title"] = Model.Title;
 }
-<a asp-action="Index" class="btn btn-ghost mb-3">&larr; Back to jobs</a>
+
+<a asp-action="Index" class="btn btn-ghost mb-3 no-print">&larr; Back to jobs</a>
+
 <div class="card-clean" style="max-width: 720px;">
     <div class="d-flex gap-3 align-items-start mb-4">
         <div class="job-company-badge" style="width:52px;height:52px;font-size:1.25rem;">
             @(Model.Employer?.Company?.Name?.Substring(0, 1) ?? "?")
         </div>
-        <div>
+        <div class="flex-grow-1">
             <h2 class="mb-1">@Model.Title</h2>
             <p class="job-meta mb-0">@Model.Employer?.Company?.Name &middot; @Model.Location</p>
         </div>
+        <span class="badge-pill @(Model.Status == AI_powerd_job_search_management_system.Models.JobStatus.Open ? "badge-open" : "badge-closed")">
+            @Model.Status
+        </span>
     </div>
-    <p><strong>Salary:</strong> @(Model.SalaryRange ?? "Not specified")</p>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4"><strong>Category:</strong> @Model.Category</div>
+        <div class="col-md-4"><strong>Salary:</strong> @(Model.SalaryRange ?? "Not specified")</div>
+        <div class="col-md-4"><strong>Deadline:</strong> @(Model.Deadline?.ToString("dd MMM yyyy") ?? "Not specified")</div>
+    </div>
+    <p class="text-muted small">Posted @Model.PostedAt.ToString("dd MMM yyyy")</p>
+
     <h5 class="mt-4">Description</h5>
     <p style="white-space: pre-wrap;" class="text-muted">@Model.Description</p>
+
     @if (Model.JobSkills.Any())
     {
         <h5 class="mt-4">Required skills</h5>
@@ -26,13 +40,32 @@
             }
         </div>
     }
+
     <hr />
-    @if (ViewBag.AlreadyApplied == true)
+    <h5>About @Model.Employer?.Company?.Name</h5>
+    <p class="text-muted mb-1">@(Model.Employer?.Company?.Description ?? "No description provided.")</p>
+    @if (!string.IsNullOrWhiteSpace(Model.Employer?.Company?.Website))
     {
-        <span class="badge-pill badge-open">Already applied</span>
+        <p class="mb-0"><a href="@Model.Employer.Company.Website" target="_blank">@Model.Employer.Company.Website</a></p>
     }
-    else
-    {
-        <a asp-action="Apply" asp-route-jobId="@Model.Id" class="btn btn-pill btn-ink">Apply now</a>
-    }
+
+    <hr />
+    <div class="d-flex gap-2 flex-wrap no-print">
+        @if (ViewBag.AlreadyApplied == true)
+        {
+            <span class="badge-pill badge-open align-self-center">Already applied</span>
+        }
+        else
+        {
+            <a asp-action="Apply" asp-route-jobId="@Model.Id" class="btn btn-pill btn-ink">Apply now</a>
+        }
+
+        <form asp-action="ToggleSaveJob" asp-route-jobId="@Model.Id" method="post">
+            <button type="submit" class="btn btn-pill btn-mint-outline">
+                @(ViewBag.IsSaved == true ? "Unsave job" : "Save job")
+            </button>
+        </form>
+
+        <button type="button" class="btn btn-pill btn-ghost" onclick="window.print()">Print</button>
+    </div>
 </div>

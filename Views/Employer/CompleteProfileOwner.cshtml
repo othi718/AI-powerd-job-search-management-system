@@ -1,0 +1,53 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.CompleteEmployerProfileViewModel
+@{
+    ViewData["Title"] = "Register Your Company";
+}
+
+<div class="page-header">
+    <h2>Register your company</h2>
+    <p>An Admin will review these details before your company goes live.</p>
+</div>
+
+<div class="card-clean" style="max-width: 560px;">
+    <form asp-action="CompleteProfileOwner" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="CompanyName" class="form-label"></label>
+            <input asp-for="CompanyName" class="form-control" />
+            <span asp-validation-for="CompanyName" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Website" class="form-label"></label>
+            <input asp-for="Website" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="ContactEmail" class="form-label"></label>
+            <input asp-for="ContactEmail" class="form-control" />
+            <span asp-validation-for="ContactEmail" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control" />
+            <span asp-validation-for="Location" class="text-danger small"></span>
+        </div>
+        <div class="mb-4">
+            <label asp-for="JobTitle" class="form-label"></label>
+            <input asp-for="JobTitle" class="form-control" placeholder="e.g. Founder / CEO" />
+            <span asp-validation-for="JobTitle" class="text-danger small"></span>
+        </div>
+
+        <button type="submit" class="btn btn-pill btn-ink">Submit for approval</button>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using AI_powerd_job_search_management_system.Models;
+using AI_Powered_Smart_Job_Management_System.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using AI_powerd_job_search_management_system.Models;
+using System.Reflection.Emit;
 
 namespace AI_powerd_job_search_management_system.Data
 {
@@ -28,8 +30,12 @@ namespace AI_powerd_job_search_management_system.Data
         public DbSet<AIAnalysis> AIAnalyses { get; set; }
         public DbSet<SavedJob> SavedJobs { get; set; }
         public DbSet<Interview> Interviews { get; set; }
+        public DbSet<InterviewMessage> InterviewMessages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<JobSeekerSkill> JobSeekerSkills { get; set; }
+        public DbSet<Branch> Branches { get; set; }
+        public DbSet<CompanyFollow> CompanyFollows { get; set; }
+        public DbSet<CompanyReview> CompanyReviews { get; set; }
 
 
 
@@ -37,27 +43,64 @@ namespace AI_powerd_job_search_management_system.Data
         {
             base.OnModelCreating(builder);
 
-            // Break JobSeeker -> JobApplication direct cascade
+            // JobSeeker -> JobApplication
             builder.Entity<JobApplication>()
                 .HasOne(ja => ja.JobSeeker)
                 .WithMany(js => js.Applications)
                 .HasForeignKey(ja => ja.JobSeekerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Break Resume -> JobApplication cascade too
+            // Resume -> JobApplication
             builder.Entity<JobApplication>()
                 .HasOne(ja => ja.Resume)
                 .WithMany()
                 .HasForeignKey(ja => ja.ResumeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Break JobSeeker -> SavedJob direct cascade
-            // (Job -> SavedJob stays cascading, same pattern as JobApplication above)
+            // JobSeeker -> SavedJob
             builder.Entity<SavedJob>()
                 .HasOne(sj => sj.JobSeeker)
                 .WithMany(js => js.SavedJobs)
                 .HasForeignKey(sj => sj.JobSeekerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // ApplicationUser -> InterviewMessage
+            builder.Entity<InterviewMessage>()
+                .HasOne(im => im.Sender)
+                .WithMany()
+                .HasForeignKey(im => im.SenderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // IMPORTANT:
+            // Prevent Company -> Branch -> Employer
+            // and Company -> Employer multiple cascade paths
+            builder.Entity<Employer>()
+    .HasOne(e => e.Branch)
+    .WithMany(b => b.Employers)
+    .HasForeignKey(e => e.BranchId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Employer>()
+    .HasOne(e => e.Company)
+    .WithMany(c => c.Employers)
+    .HasForeignKey(e => e.CompanyId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.Entity<Branch>()
+    .HasOne(b => b.Company)
+    .WithMany(c => c.Branches)
+    .HasForeignKey(b => b.CompanyId)
+    .OnDelete(DeleteBehavior.Cascade);
+            // Unique Company Follow
+            builder.Entity<CompanyFollow>()
+                .HasIndex(f => new { f.JobSeekerUserId, f.CompanyId })
+                .IsUnique();
+
+            // Unique Company Review
+            builder.Entity<CompanyReview>()
+                .HasIndex(r => new { r.JobSeekerUserId, r.CompanyId })
+                .IsUnique();
         }
     }
 }

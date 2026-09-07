@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AI_powerd_job_search_management_system.Data;
+using AI_powerd_job_search_management_system.Models;
+using AI_powerd_job_search_management_system.Utilities;
+using AI_powerd_job_search_management_system.ViewModels;
+using AI_Powered_Smart_Job_Management_System.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AI_powerd_job_search_management_system.Data;
-using AI_powerd_job_search_management_system.Models;
-using AI_powerd_job_search_management_system.ViewModels;
-using AI_powerd_job_search_management_system.Utilities;
 
 namespace AI_powerd_job_search_management_system.Controllers
 {
@@ -121,7 +122,8 @@ namespace AI_powerd_job_search_management_system.Controllers
                 await _context.JobApplications.AnyAsync(
                     a => a.JobId == id &&
                          a.JobSeekerId == jobSeeker.Id);
-
+            ViewBag.IsSaved = jobSeeker != null &&
+    await _context.SavedJobs.AnyAsync(s => s.JobId == id && s.JobSeekerId == jobSeeker.Id);
             return View(job);
         }
 
@@ -381,11 +383,47 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             return RedirectToAction("MyResumes");
         }
+        private async Task RecalculateMatchAsync(JobApplication application)
+        {
+            var requiredSkills = await _context.JobSkills
+                .Where(js => js.JobId == application.JobId)
+                .Include(js => js.Skill)
+                .Select(js => js.Skill!.Name.Trim())
+                .ToListAsync();
+
+            var candidateSkills = await _context.JobSeekerSkills
+                .Where(s => s.JobSeekerId == application.JobSeekerId)
+                .Include(s => s.Skill)
+                .Select(s => s.Skill!.Name.Trim())
+                .ToListAsync();
+
+            var matchedSkills = requiredSkills.Where(r => candidateSkills.Any(c => SkillMatcher.IsMatch(c, r))).ToList();
+            var missingSkills = requiredSkills.Where(r => !candidateSkills.Any(c => SkillMatcher.IsMatch(c, r))).ToList();
+
+            double score = requiredSkills.Any()
+                ? Math.Round((double)matchedSkills.Count / requiredSkills.Count * 100, 1)
+                : 0;
+
+            application.MatchScore = score;
+
+            var analysis = await _context.AIAnalyses.FirstOrDefaultAsync(a => a.JobApplicationId == application.Id);
+            if (analysis == null)
+            {
+                analysis = new AIAnalysis { JobApplicationId = application.Id };
+                _context.AIAnalyses.Add(analysis);
+            }
+            analysis.MatchedSkills = matchedSkills.Any() ? string.Join(", ", matchedSkills) : "None";
+            analysis.MissingSkills = missingSkills.Any() ? string.Join(", ", missingSkills) : "None";
+            analysis.SkillMatchScore = score;
+            analysis.OverallScore = score;
+
+            await _context.SaveChangesAsync();
+        }
 
 
 
         // APPLY - GET
-      
+
         [HttpGet]
         public async Task<IActionResult> Apply(int jobId)
         {
@@ -464,43 +502,9 @@ namespace AI_powerd_job_search_management_system.Controllers
             await _context.SaveChangesAsync();
 
             //  AI matching: compare job's required skills vs this job seeker's skills 
+            await RecalculateMatchAsync(application);
 
-            var requiredSkills = await _context.JobSkills
-                .Where(js => js.JobId == jobId)
-                .Include(js => js.Skill)
-                .Select(js => js.Skill!.Name.Trim())
-                .ToListAsync();
-
-            var candidateSkills = await _context.JobSeekerSkills
-                .Where(s => s.JobSeekerId == jobSeeker.Id)
-                .Include(s => s.Skill)
-                .Select(s => s.Skill!.Name.Trim())
-                .ToListAsync();
-
-            var matchedSkills = requiredSkills
-                .Where(r => candidateSkills.Any(c => SkillMatcher.IsMatch(c, r)))
-                .ToList();
-
-            var missingSkills = requiredSkills
-                .Where(r => !candidateSkills.Any(c => SkillMatcher.IsMatch(c, r)))
-                .ToList();
-
-            double score = requiredSkills.Any()
-                ? Math.Round((double)matchedSkills.Count / requiredSkills.Count * 100, 1)
-                : 0;
-
-            application.MatchScore = score;
-
-            _context.AIAnalyses.Add(new AIAnalysis
-            {
-                JobApplicationId = application.Id,
-                MatchedSkills = matchedSkills.Any() ? string.Join(", ", matchedSkills) : "None",
-                MissingSkills = missingSkills.Any() ? string.Join(", ", missingSkills) : "None",
-                SkillMatchScore = score,
-                EducationExperienceScore = 0,
-                OverallScore = score
-            });
-
+         
             await _context.SaveChangesAsync();
 
             return RedirectToAction("MyApplications");
@@ -529,9 +533,63 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             return View(applications);
         }
+        [HttpGet]
+        public async Task<IActionResult> EditApplication(int id)
+        {
+            var jobSeeker = await GetCurrentJobSeekerAsync();
+            if (jobSeeker == null) return RedirectToAction("CompleteProfile");
+
+            var application = await _context.JobApplications
+                .FirstOrDefaultAsync(a => a.Id == id && a.JobSeekerId == jobSeeker.Id);
+            if (application == null) return NotFound();
+
+            if ((DateTime.UtcNow - application.AppliedAt).TotalHours > 24)
+            {
+                TempData["Message"] = "The 24-hour edit window for this application has passed.";
+                return RedirectToAction("MyApplications");
+            }
+
+            var resumes = await _context.Resumes
+                .Where(r => r.JobSeekerId == jobSeeker.Id)
+                .OrderByDescending(r => r.UploadedAt)
+                .ToListAsync();
+
+            ViewBag.Application = application;
+            ViewBag.Resumes = resumes;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditApplication(int id, int resumeId)
+        {
+            var jobSeeker = await GetCurrentJobSeekerAsync();
+            if (jobSeeker == null) return RedirectToAction("CompleteProfile");
+
+            var application = await _context.JobApplications
+                .FirstOrDefaultAsync(a => a.Id == id && a.JobSeekerId == jobSeeker.Id);
+            if (application == null) return NotFound();
+
+            if ((DateTime.UtcNow - application.AppliedAt).TotalHours > 24)
+            {
+                TempData["Message"] = "The 24-hour edit window for this application has passed.";
+                return RedirectToAction("MyApplications");
+            }
+
+            var resume = await _context.Resumes
+                .FirstOrDefaultAsync(r => r.Id == resumeId && r.JobSeekerId == jobSeeker.Id);
+            if (resume == null) return NotFound();
+
+            application.ResumeId = resumeId;
+            await _context.SaveChangesAsync();
+
+            await RecalculateMatchAsync(application);
+
+            return RedirectToAction("MyApplications");
+        }
 
         // MY SKILLS
-      
+
         [HttpGet]
         public async Task<IActionResult> Skills()
         {
@@ -638,6 +696,7 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             var notifications = await _context.Notifications
        .Include(n => n.Job)
+       .Include(n => n.JobApplication)
        .Where(n => n.ApplicationUserId == jobSeeker.ApplicationUserId)
        .OrderByDescending(n => n.CreatedAt)
        .ToListAsync();
@@ -651,5 +710,41 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             return View(notifications);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleSaveJob(int jobId)
+        {
+            var jobSeeker = await GetCurrentJobSeekerAsync();
+            if (jobSeeker == null) return RedirectToAction("CompleteProfile");
+
+            var existing = await _context.SavedJobs
+                .FirstOrDefaultAsync(s => s.JobId == jobId && s.JobSeekerId == jobSeeker.Id);
+
+            if (existing != null)
+                _context.SavedJobs.Remove(existing);
+            else
+                _context.SavedJobs.Add(new SavedJob { JobId = jobId, JobSeekerId = jobSeeker.Id });
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Details", new { id = jobId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SavedJobs()
+        {
+            var jobSeeker = await GetCurrentJobSeekerAsync();
+            if (jobSeeker == null) return RedirectToAction("CompleteProfile");
+
+            var saved = await _context.SavedJobs
+                .Include(s => s.Job)
+                    .ThenInclude(j => j!.Employer)
+                        .ThenInclude(e => e!.Company)
+                .Where(s => s.JobSeekerId == jobSeeker.Id)
+                .OrderByDescending(s => s.SavedAt)
+                .ToListAsync();
+
+            return View(saved);
+        }
+
     }
 }

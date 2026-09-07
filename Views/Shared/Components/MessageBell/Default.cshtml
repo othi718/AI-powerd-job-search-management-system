@@ -1,0 +1,10 @@
+﻿@model int
+
+<a href="#" onclick="alert('Open Discuss from your applications/applicants list to view messages.'); return false;"
+   class="position-relative d-inline-flex align-items-center me-2" title="Messages">
+    <span style="font-size:1.25rem;">&#128172;</span>
+    @if (Model > 0)
+    {
+        <span class="position-absolute badge rounded-pill bg-danger" style="top:-4px; right:-8px; font-size:0.65rem;">@Model</span>
+    }
+</a>

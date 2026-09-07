@@ -1,4 +1,4 @@
-﻿@model List<AI_powerd_job_search_management_system.Models.JobApplication>
+﻿@model List<AI_Powered_Smart_Job_Management_System.Models.JobApplication>
 
 @{
     ViewData["Title"] = "Applicants";
@@ -27,7 +27,8 @@ else
                     <th>Resume</th>
                     <th>Applied</th>
                     <th>Match</th>
-                    <th class="pe-4">Status</th>
+                    <th>Status</th>
+                    <th class="pe-4">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,17 +47,21 @@ else
                                 <small class="text-muted">Missing: @app.AIAnalysis.MissingSkills</small>
                             }
                         </td>
-                        <td class="pe-4">
+                        <td>
                             <form asp-action="UpdateApplicationStatus" method="post" class="d-flex gap-1">
                                 <input type="hidden" name="applicationId" value="@app.Id" />
                                 <select name="status" class="form-select form-select-sm" style="width:auto;">
-                                    @foreach (var s in Enum.GetValues(typeof(AI_powerd_job_search_management_system.Models.ApplicationStatus)))
+                                    @foreach (var s in Enum.GetValues(typeof(AI_Powered_Smart_Job_Management_System.Models.ApplicationStatus)))
                                     {
                                         <option value="@s" selected="@(s.Equals(app.Status))">@s</option>
                                     }
                                 </select>
                                 <button type="submit" class="btn btn-pill btn-ghost btn-sm">Update</button>
                             </form>
+                        </td>
+                        <td class="pe-4 d-flex gap-1">
+                            <a asp-action="ScheduleInterview" asp-route-applicationId="@app.Id" class="btn btn-pill btn-mint-outline btn-sm">Interview</a>
+                            <a asp-controller="Messages" asp-action="Discuss" asp-route-applicationId="@app.Id" class="btn btn-pill btn-ghost btn-sm">Discuss</a>
                         </td>
                     </tr>
                 }

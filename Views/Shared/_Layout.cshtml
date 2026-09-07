@@ -51,6 +51,7 @@
                                 <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="MyApplications">My Applications</a></li>
                                 <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="Skills">Skills</a></li>
                                 <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="Profile">My Profile</a></li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="JobSeeker" asp-action="SavedJobs">Saved Jobs</a></li>
                             }
                         }
                     </ul>
@@ -62,6 +63,16 @@
                                 <li class="nav-item d-flex align-items-center">
                                     @await Component.InvokeAsync("NotificationBell")
                                 </li>
+                                <li class="nav-item d-flex align-items-center">
+                                    @await Component.InvokeAsync("MessageBell")
+                                </li>
+                            }
+                            @if (User.IsInRole("Employer"))
+                            {
+                                <li class="nav-item d-flex align-items-center">
+                                    @await Component.InvokeAsync("MessageBell")
+                                </li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="Employer" asp-action="PendingStaff">Pending Staff</a></li>
                             }
                             <li class="nav-item d-flex align-items-center me-2">
                                 <span class="text-muted small">@User.Identity.Name</span>

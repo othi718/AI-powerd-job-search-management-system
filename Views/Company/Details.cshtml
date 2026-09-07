@@ -1,0 +1,65 @@
+﻿@model AI_powerd_job_search_management_system.ViewModels.CompanyViewModel
+
+
+<div class="container mt-4">
+    <div class="card p-4 shadow-sm mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                @if (!string.IsNullOrEmpty(Model.Company.LogoPath))
+                {
+                    <img src="~/UploadedFiles/Logos/@Model.Company.LogoPath" class="rounded me-3" style="width:80px; height:80px; object-fit:cover;" />
+                }
+                <div>
+                    <h2>@Model.Company.Name</h2>
+                    <span class="badge bg-success">● @Model.Jobs.Count Jobs Available</span>
+                </div>
+            </div>
+            @if (User.IsInRole("Employer"))
+            {
+                <a asp-action="AddEmployee" class="btn btn-outline-primary">+ Assign Employee</a>
+            }
+        </div>
+    </div>
+
+    <!-- TAB NAVIGATION -->
+    <ul class="nav nav-tabs mb-3" id="companyTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="insight-tab" data-bs-toggle="tab" data-bs-target="#insight" type="button">Company Insight</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="jobs-tab" data-bs-toggle="tab" data-bs-target="#jobs" type="button">Jobs (@Model.Jobs.Count)</button>
+        </li>
+    </ul>
+
+    <!-- TAB CONTENT -->
+    <div class="tab-content">
+        <div class="tab-pane fade show active p-3 bg-white border border-top-0 rounded-bottom" id="insight">
+            <h4>About @Model.Company.Name</h4>
+            <p>@(string.IsNullOrEmpty(Model.Company.Description) ? "No description provided." : Model.Company.Description)</p>
+            <h5 class="mt-4">Company Insights</h5>
+            <p>@(string.IsNullOrEmpty(Model.Company.Insights) ? "No detailed insights posted yet." : Model.Company.Insights)</p>
+        </div>
+
+        <div class="tab-pane fade p-3 bg-white border border-top-0 rounded-bottom" id="jobs">
+            @if (!Model.Jobs.Any())
+            {
+                <p class="text-muted">No open job postings currently available.</p>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var job in Model.Jobs)
+                    {
+                        <a asp-controller="JobSeeker" asp-action="Details" asp-route-id="@job.Id" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1 text-primary">@job.Title</h5>
+                                <small class="text-muted">@job.Location • @job.SalaryRange</small>
+                            </div>
+                            <span class="badge bg-secondary">Deadline: @job.Deadline?.ToString("dd MMM yyyy")</span>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

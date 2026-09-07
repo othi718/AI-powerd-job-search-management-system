@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_powerd_job_search_management_system.Models
 {
-    public class AIAnalysis
+    public class InterviewMessage
     {
         public int Id { get; set; }
 
@@ -13,13 +13,16 @@ namespace AI_powerd_job_search_management_system.Models
         [ForeignKey(nameof(JobApplicationId))]
         public JobApplication? JobApplication { get; set; }
 
-        public string? MatchedSkills { get; set; }
-        public string? MissingSkills { get; set; }
+        [Required]
+        public string SenderUserId { get; set; } = string.Empty;
+        [ForeignKey(nameof(SenderUserId))]
+        public ApplicationUser? Sender { get; set; }
 
-        public double SkillMatchScore { get; set; }
-        public double EducationExperienceScore { get; set; }
-        public double OverallScore { get; set; }
+        [Required]
+        public string Message { get; set; } = string.Empty;
 
-        public DateTime AnalyzedAt { get; set; } = DateTime.UtcNow;
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public bool IsRead { get; set; } = false;
+
     }
 }
