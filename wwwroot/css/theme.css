@@ -651,6 +651,15 @@ input:-webkit-autofill:active {
     border-radius: 999px;
     font-size: 0.85rem;
 }
+.ai-insight {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #6c757d;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    min-width: 220px;
+    max-width: 350px;
+}
 @media print {
     .no-print, .site-navbar, .site-footer {
         display: none !important;

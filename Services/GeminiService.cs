@@ -5,62 +5,160 @@ namespace AI_powerd_job_search_management_system.Services
 {
     public class GeminiService
     {
-        private readonly HttpClient _http;
-        private readonly string _apiKey;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<GeminiService> _logger;
 
-        public GeminiService(HttpClient http, IConfiguration config)
+        public GeminiService(
+            HttpClient httpClient,
+            IConfiguration configuration,
+            ILogger<GeminiService> logger)
         {
-            _http = http;
-            _apiKey = config["GeminiSettings:ApiKey"] ?? string.Empty;
+            _httpClient = httpClient;
+            _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<string> GenerateMatchInsightAsync(
-            string jobTitle, string jobDescription,
-            List<string> requiredSkills, List<string> candidateSkills, double matchScore)
+            string jobTitle,
+            string jobDescription,
+            List<string> requiredSkills,
+            List<string> candidateSkills,
+            double matchScore)
         {
-            if (string.IsNullOrWhiteSpace(_apiKey))
-                return "AI insight unavailable (no API key configured).";
+            var apiKey = _configuration["GeminiSettings:ApiKey"];
+
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                _logger.LogError(
+                    "Gemini API key was not found at GeminiSettings:ApiKey.");
+
+                return "AI insight unavailable: API key is not configured.";
+            }
 
             var prompt =
-                $"You are a recruitment assistant. A candidate applied for the job \"{jobTitle}\".\n" +
+                $"You are a professional recruitment assistant.\n\n" +
+                $"Job title: {jobTitle}\n" +
                 $"Job description: {jobDescription}\n" +
-                $"Required skills: {string.Join(", ", requiredSkills)}\n" +
-                $"Candidate's skills: {string.Join(", ", candidateSkills)}\n" +
-                $"Calculated match score: {matchScore}%.\n" +
-                "In 2-3 short sentences, give the employer a brief, honest insight about this candidate's fit " +
-                "for the role, mentioning their strongest relevant skill and the biggest gap, if any. " +
-                "Be concise and professional.";
+                $"Required skills: " +
+                $"{(requiredSkills.Any() ? string.Join(", ", requiredSkills) : "Not specified")}\n" +
+                $"Candidate skills: " +
+                $"{(candidateSkills.Any() ? string.Join(", ", candidateSkills) : "Not specified")}\n" +
+                $"Calculated match score: {matchScore:F1}%\n\n" +
+                "Write two short professional sentences about the candidate's suitability. " +
+                "Mention the strongest matching skill and the most important missing skill. " +
+                "Do not change the calculated match score.";
 
             try
             {
-                var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={_apiKey}";
+                // Current Gemini Flash model.
+                const string url =
+                    "https://generativelanguage.googleapis.com/v1beta/" +
+                    "models/gemini-3.8-flash:generateContent";
 
                 var requestBody = new
                 {
                     contents = new[]
                     {
-                        new { parts = new[] { new { text = prompt } } }
+                        new
+                        {
+                            role = "user",
+                            parts = new[]
+                            {
+                                new
+                                {
+                                    text = prompt
+                                }
+                            }
+                        }
+                    },
+                    generationConfig = new
+                    {
+                        temperature = 0.4,
+                        maxOutputTokens = 200
                     }
                 };
 
-                var response = await _http.PostAsJsonAsync(url, requestBody);
+                using var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    url);
+
+                request.Headers.Add("x-goog-api-key", apiKey);
+                request.Content = JsonContent.Create(requestBody);
+
+                using var response = await _httpClient.SendAsync(request);
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
-                    return "AI insight unavailable at this time.";
+                {
+                    _logger.LogError(
+                        "Gemini request failed. Status: {StatusCode}. Response: {Response}",
+                        (int)response.StatusCode,
+                        responseBody);
 
-                var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+                    return $"AI insight unavailable. Gemini returned HTTP {(int)response.StatusCode}.";
+                }
 
-                var text = json
-                    .GetProperty("candidates")[0]
-                    .GetProperty("content")
-                    .GetProperty("parts")[0]
-                    .GetProperty("text")
-                    .GetString();
+                using var jsonDocument = JsonDocument.Parse(responseBody);
+                var root = jsonDocument.RootElement;
 
-                return text?.Trim() ?? "AI insight unavailable.";
+                if (!root.TryGetProperty("candidates", out var candidates) ||
+                    candidates.GetArrayLength() == 0)
+                {
+                    _logger.LogError(
+                        "Gemini response did not contain candidates. Response: {Response}",
+                        responseBody);
+
+                    return "AI insight unavailable: Gemini returned no candidate response.";
+                }
+
+                var firstCandidate = candidates[0];
+
+                if (!firstCandidate.TryGetProperty("content", out var content) ||
+                    !content.TryGetProperty("parts", out var parts) ||
+                    parts.GetArrayLength() == 0 ||
+                    !parts[0].TryGetProperty("text", out var textElement))
+                {
+                    _logger.LogError(
+                        "Gemini response did not contain generated text. Response: {Response}",
+                        responseBody);
+
+                    return "AI insight unavailable: Gemini returned no text.";
+                }
+
+                var insight = textElement.GetString();
+
+                if (string.IsNullOrWhiteSpace(insight))
+                {
+                    return "AI insight unavailable: Gemini returned empty text.";
+                }
+
+                return insight.Trim();
             }
-            catch
+            catch (HttpRequestException ex)
             {
-                return "AI insight unavailable at this time.";
+                _logger.LogError(
+                    ex,
+                    "Network error while communicating with Gemini.");
+
+                return "AI insight unavailable: could not connect to Gemini.";
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Gemini returned an invalid JSON response.");
+
+                return "AI insight unavailable: invalid Gemini response.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while generating Gemini insight.");
+
+                return "AI insight unavailable due to an unexpected error.";
             }
         }
     }

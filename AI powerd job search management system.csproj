@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>AI_powerd_job_search_management_system</RootNamespace>
+    <UserSecretsId>0d16d1ee-7310-4d4e-b144-67e956fa1f13</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,6 +5,7 @@ using AI_powerd_job_search_management_system.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

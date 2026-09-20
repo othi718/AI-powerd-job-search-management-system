@@ -4,60 +4,144 @@
     ViewData["Title"] = "My Applications";
 }
 
+<style>
+    .applications-table {
+        min-width: 950px;
+    }
+
+    .match-column {
+        width: 350px;
+        min-width: 280px;
+    }
+
+    .ai-insight {
+        display: block;
+        margin-top: 5px;
+        max-width: 350px;
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-style: italic;
+        font-weight: normal;
+        line-height: 1.4;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+</style>
+
 <div class="page-header">
     <h2>My applications</h2>
-    <p>@Model.Count() submitted</p>
+    <p>@Model.Count submitted</p>
 </div>
 
 @if (!Model.Any())
 {
     <div class="card-clean text-center py-5">
-        <p class="mb-0 text-muted">You haven't applied to any jobs yet.</p>
+        <p class="mb-0 text-muted">
+            You haven't applied to any jobs yet.
+        </p>
     </div>
 }
 else
 {
     <div class="card-clean p-0">
-        <table class="table align-middle mb-0">
-            <thead>
-                <tr class="text-muted small text-uppercase">
-                    <th class="ps-4">Job</th>
-                    <th>Company</th>
-                    <th>Applied</th>
-                    <th>Match</th>
-                    <th>Status</th>
-                    <th class="pe-4">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var app in Model)
-                {
-                    <tr>
-                        <td class="ps-4 fw-semibold">@app.Job?.Title</td>
-                        <td class="text-muted">@app.Job?.Employer?.Company?.Name</td>
-                        <td class="text-muted">@app.AppliedAt.ToString("dd MMM yyyy")</td>
-                        <td>
-                            @app.MatchScore%
-                            @if (app.AIAnalysis != null && !string.IsNullOrWhiteSpace(app.AIAnalysis.AIInsight))
-                            {
-                                <br />
-                                <small class="text-muted fst-italic">"@app.AIAnalysis.AIInsight"</small>
-                            }
-                        </td>
-                        <td>
-                            <span class="badge-pill @(app.Status == AI_powerd_job_search_management_system.Models.ApplicationStatus.Accepted ? "badge-open" : "badge-closed")">
-                                @app.Status
-                            </span>
-                        </td>
-                        <td class="pe-4 d-flex gap-1">
-                            @if ((DateTime.UtcNow - app.AppliedAt).TotalHours <= 24)
-                            {
-                                <a asp-action="EditApplication" asp-route-id="@app.Id" class="btn btn-pill btn-ghost btn-sm">Edit</a>
-                            }
-                        </td>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0 applications-table">
+                <thead>
+                    <tr class="text-muted small text-uppercase">
+                        <th class="ps-4">Job</th>
+                        <th>Company</th>
+                        <th>Applied</th>
+                        <th class="match-column">Match</th>
+                        <th>Status</th>
+                        <th class="pe-4">Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-semibold">
+                                @app.Job?.Title
+                            </td>
+
+                            <td>
+                                @if (app.Job?.Employer?.Company != null)
+                                {
+                                    <a asp-controller="Company"
+                                       asp-action="Details"
+                                       asp-route-id="@app.Job.Employer.Company.Id"
+                                       class="text-decoration-none">
+                                        @app.Job.Employer.Company.Name
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        Company unavailable
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-muted">
+                                @app.AppliedAt.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td class="match-column">
+                                <div class="fw-semibold">
+                                    @app.MatchScore.ToString("0.#")%
+                                </div>
+
+                                @if (app.AIAnalysis != null &&
+                                                        !string.IsNullOrWhiteSpace(
+                                                        app.AIAnalysis.AIInsight))
+                                {
+                                    <span class="ai-insight">
+                                        “@app.AIAnalysis.AIInsight”
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="ai-insight">
+                                        AI analysis has not been generated.
+                                    </span>
+                                }
+                        </td>
+
+                        <td>
+                            <span class="badge-pill
+                                        @(app.Status ==
+                                                                        AI_powerd_job_search_management_system
+                                                                        .Models.ApplicationStatus.Accepted
+                                                                          ? "badge-open"
+                                                                          : "badge-closed")">
+
+                            @app.Status
+                        </span>
+                    </td>
+
+                            <td class="pe-4">
+                        @if ((DateTime.UtcNow - app.AppliedAt)
+                                                .TotalHours <= 24)
+                                {
+                                    <a asp-action="EditApplication"
+                                       asp-route-id="@app.Id"
+                                       class="btn btn-pill btn-ghost btn-sm">
+                                        Edit
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">
+                                        —
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 }
