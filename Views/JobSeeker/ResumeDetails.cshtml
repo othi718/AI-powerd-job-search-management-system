@@ -1,11 +1,14 @@
-﻿@{
+﻿@using AI_powerd_job_search_management_system.Models
+
+@{
     ViewData["Title"] = "Resume Details";
-    var resume = (AI_powerd_job_search_management_system.Models.Resume)ViewBag.Resume;
-    var educations = (List<AI_powerd_job_search_management_system.Models.Education>)ViewBag.Educations;
-    var experiences = (List<AI_powerd_job_search_management_system.Models.Experience>)ViewBag.Experiences;
-    var certifications = (List<AI_powerd_job_search_management_system.Models.Certification>)ViewBag.Certifications;
-    var projects = (List<AI_powerd_job_search_management_system.Models.Project>)ViewBag.Projects;
-    var activities = (List<AI_powerd_job_search_management_system.Models.ExtracurricularActivity>)ViewBag.Activities;
+
+    var resume = (Resume)ViewBag.Resume;
+    var educations = (List<Education>)ViewBag.Educations;
+    var experiences = (List<Experience>)ViewBag.Experiences;
+    var certifications = (List<Certification>)ViewBag.Certifications;
+    var projects = (List<Project>)ViewBag.Projects;
+    var activities = (List<ExtracurricularActivity>)ViewBag.Activities;
 }
 
 <div class="page-header">
@@ -13,128 +16,551 @@
     <p>@resume.OriginalFileName</p>
 </div>
 
-<!-- Education -->
+@if (TempData["ResumeError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">
+        @error
+    </div>
+}
+
+<!-- EDUCATION -->
 <div class="card-clean mb-4">
     <h5 class="mb-3">Education</h5>
-    @foreach (var e in educations)
+
+    @if (!educations.Any())
     {
-        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+        <p class="text-muted small">No education details added yet.</p>
+    }
+
+    @foreach (var education in educations.OrderByDescending(e => e.StartDate))
+    {
+        <div class="d-flex justify-content-between align-items-start
+                        gap-3 border-bottom py-3">
             <div>
-                <strong>@e.Institution</strong> — @e.Degree @(e.FieldOfStudy != null ? $"in {e.FieldOfStudy}" : "")
-                <div class="text-muted small">@e.StartDate?.ToString("yyyy") - @(e.EndDate?.ToString("yyyy") ?? "Present")</div>
+                <strong>@education.Institution</strong>
+
+                <div>
+                    @education.Degree
+
+                    @if (!string.IsNullOrWhiteSpace(education.FieldOfStudy))
+                    {
+                        <span> — @education.FieldOfStudy</span>
+                    }
             </div>
+
+            <div class="text-muted small mt-1">
+                Start:
+                @(education.StartDate?.ToString("MMM yyyy")
+                                ?? "Not provided")
+                                                  <br />
+                                                  End / Expected Graduation:
+                @(education.EndDate?.ToString("MMM yyyy")
+                                ?? "Ongoing / not provided")
+            </div>
+        </div>
+
             <form asp-action="DeleteEducation" method="post">
-                <input type="hidden" name="id" value="@e.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
-                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+                <input type="hidden" name="id" value="@education.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
+
+                <button type="submit"
+                        class="btn btn-pill btn-ghost btn-sm text-danger">
+                    Remove
+                </button>
             </form>
         </div>
-    }
-    <form asp-action="AddEducation" method="post" class="row g-2 mt-3">
+        }
+
+    <form asp-action="AddEducation"
+          method="post"
+          class="row g-3 mt-2 resume-date-form">
+
         <input type="hidden" name="resumeId" value="@resume.Id" />
-        <div class="col-md-4"><input name="institution" class="form-control" placeholder="Institution" required /></div>
-        <div class="col-md-3"><input name="degree" class="form-control" placeholder="Degree" /></div>
-        <div class="col-md-3"><input name="fieldOfStudy" class="form-control" placeholder="Field of study" /></div>
-        <div class="col-md-1"><input type="date" name="startDate" class="form-control" /></div>
-        <div class="col-md-1"><input type="date" name="endDate" class="form-control" /></div>
-        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Education</button></div>
+
+        <div class="col-md-6">
+            <label for="educationInstitution" class="form-label">
+                Institution
+            </label>
+            <input id="educationInstitution"
+                   name="institution"
+                   class="form-control"
+                   placeholder="School, college or university"
+                   maxlength="200"
+                   required />
+        </div>
+
+        <div class="col-md-6">
+            <label for="educationDegree" class="form-label">
+                Degree
+            </label>
+            <input id="educationDegree"
+                   name="degree"
+                   class="form-control"
+                   placeholder="e.g. BSc"
+                   maxlength="150" />
+        </div>
+
+        <div class="col-md-4">
+            <label for="educationField" class="form-label">
+                Field of Study
+            </label>
+            <input id="educationField"
+                   name="fieldOfStudy"
+                   class="form-control"
+                   placeholder="e.g. Computer Science"
+                   maxlength="150" />
+        </div>
+
+        <div class="col-md-4">
+            <label for="educationStart" class="form-label">
+                Start Date
+            </label>
+            <input id="educationStart"
+                   type="date"
+                   name="startDate"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label for="educationEnd" class="form-label">
+                End / Expected Graduation Date
+            </label>
+            <input id="educationEnd"
+                   type="date"
+                   name="endDate"
+                   class="form-control" />
+
+            <div class="form-text">
+                Leave blank if ongoing and the completion date is unknown.
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button type="submit"
+                    class="btn btn-pill btn-mint-outline btn-sm">
+                + Add Education
+            </button>
+        </div>
     </form>
 </div>
 
-<!-- Experience -->
+<!-- EXPERIENCE -->
 <div class="card-clean mb-4">
     <h5 class="mb-3">Experience</h5>
-    @foreach (var e in experiences)
+
+    @if (!experiences.Any())
     {
-        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+        <p class="text-muted small">No experience details added yet.</p>
+    }
+
+    @foreach (var experience in experiences.OrderByDescending(e => e.StartDate))
+    {
+        <div class="d-flex justify-content-between align-items-start
+                        gap-3 border-bottom py-3">
             <div>
-                <strong>@e.JobTitle</strong> at @e.CompanyName
-                <div class="text-muted small">@e.StartDate?.ToString("MMM yyyy") - @(e.EndDate?.ToString("MMM yyyy") ?? "Present")</div>
-                @if (!string.IsNullOrWhiteSpace(e.Description))
+                <strong>@experience.JobTitle</strong>
+                <div>@experience.CompanyName</div>
+
+                <div class="text-muted small mt-1">
+                    Start:
+                    @(experience.StartDate?.ToString("MMM yyyy")
+                                    ?? "Not provided")
+                                                      <br />
+                                                      End:
+                    @(experience.EndDate?.ToString("MMM yyyy")
+                                    ?? "Present / not provided")
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(experience.Description))
                 {
-                    <div class="small">@e.Description</div>
+                    <div class="small mt-2"
+                         style="white-space: pre-line;">
+                        @experience.Description
+                    </div>
                 }
             </div>
+
             <form asp-action="DeleteExperience" method="post">
-                <input type="hidden" name="id" value="@e.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
-                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+                <input type="hidden" name="id" value="@experience.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
+
+                <button type="submit"
+                        class="btn btn-pill btn-ghost btn-sm text-danger">
+                    Remove
+                </button>
             </form>
         </div>
     }
-    <form asp-action="AddExperience" method="post" class="row g-2 mt-3">
+
+    <form asp-action="AddExperience"
+          method="post"
+          class="row g-3 mt-2 resume-date-form">
+
         <input type="hidden" name="resumeId" value="@resume.Id" />
-        <div class="col-md-3"><input name="companyName" class="form-control" placeholder="Company" required /></div>
-        <div class="col-md-3"><input name="jobTitle" class="form-control" placeholder="Job Title" required /></div>
-        <div class="col-md-2"><input type="date" name="startDate" class="form-control" /></div>
-        <div class="col-md-2"><input type="date" name="endDate" class="form-control" /></div>
-        <div class="col-md-2"><input name="description" class="form-control" placeholder="Description" /></div>
-        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Experience</button></div>
+
+        <div class="col-md-6">
+            <label for="experienceCompany" class="form-label">
+                Company
+            </label>
+            <input id="experienceCompany"
+                   name="companyName"
+                   class="form-control"
+                   placeholder="Company name"
+                   maxlength="150"
+                   required />
+        </div>
+
+        <div class="col-md-6">
+            <label for="experienceTitle" class="form-label">
+                Job Title
+            </label>
+            <input id="experienceTitle"
+                   name="jobTitle"
+                   class="form-control"
+                   placeholder="e.g. Software Development Intern"
+                   maxlength="150"
+                   required />
+        </div>
+
+        <div class="col-md-6">
+            <label for="experienceStart" class="form-label">
+                Start Date
+            </label>
+            <input id="experienceStart"
+                   type="date"
+                   name="startDate"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="experienceEnd" class="form-label">
+                End Date
+            </label>
+            <input id="experienceEnd"
+                   type="date"
+                   name="endDate"
+                   class="form-control" />
+
+            <div class="form-text">
+                Leave blank if you currently work here.
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label for="experienceDescription" class="form-label">
+                Responsibilities / Description
+            </label>
+            <textarea id="experienceDescription"
+                      name="description"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Describe your responsibilities and achievements"></textarea>
+        </div>
+
+        <div class="col-12">
+            <button type="submit"
+                    class="btn btn-pill btn-mint-outline btn-sm">
+                + Add Experience
+            </button>
+        </div>
     </form>
 </div>
 
-<!-- Certifications -->
+<!-- CERTIFICATIONS -->
 <div class="card-clean mb-4">
     <h5 class="mb-3">Certifications</h5>
-    @foreach (var c in certifications)
+
+    @if (!certifications.Any())
     {
-        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
-            <div><strong>@c.Name</strong> — @c.IssuingOrganization <span class="text-muted small">@c.DateIssued?.ToString("MMM yyyy")</span></div>
+        <p class="text-muted small">No certifications added yet.</p>
+    }
+
+    @foreach (var certificate in certifications.OrderByDescending(c => c.DateIssued))
+    {
+        <div class="d-flex justify-content-between align-items-start
+                        gap-3 border-bottom py-3">
+            <div>
+                <strong>@certificate.Name</strong>
+                <div>@certificate.IssuingOrganization</div>
+
+                <div class="text-muted small mt-1">
+                    Issue Date:
+                    @(certificate.DateIssued?.ToString("MMM yyyy")
+                                    ?? "Not provided")
+            </div>
+        </div>
+
             <form asp-action="DeleteCertification" method="post">
-                <input type="hidden" name="id" value="@c.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
-                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+                <input type="hidden" name="id" value="@certificate.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
+
+                <button type="submit"
+                        class="btn btn-pill btn-ghost btn-sm text-danger">
+                    Remove
+                </button>
             </form>
         </div>
-    }
-    <form asp-action="AddCertification" method="post" class="row g-2 mt-3">
+        }
+
+    <form asp-action="AddCertification"
+          method="post"
+          class="row g-3 mt-2">
+
         <input type="hidden" name="resumeId" value="@resume.Id" />
-        <div class="col-md-4"><input name="name" class="form-control" placeholder="Certification name" required /></div>
-        <div class="col-md-4"><input name="issuingOrganization" class="form-control" placeholder="Issuing organization" /></div>
-        <div class="col-md-2"><input type="date" name="dateIssued" class="form-control" /></div>
-        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Certification</button></div>
+
+        <div class="col-md-4">
+            <label for="certificationName" class="form-label">
+                Certification Name
+            </label>
+            <input id="certificationName"
+                   name="name"
+                   class="form-control"
+                   maxlength="200"
+                   required />
+        </div>
+
+        <div class="col-md-4">
+            <label for="certificationOrganization" class="form-label">
+                Issuing Organization
+            </label>
+            <input id="certificationOrganization"
+                   name="issuingOrganization"
+                   class="form-control"
+                   maxlength="200" />
+        </div>
+
+        <div class="col-md-4">
+            <label for="certificationDate" class="form-label">
+                Issue Date
+            </label>
+            <input id="certificationDate"
+                   type="date"
+                   name="dateIssued"
+                   class="form-control" />
+        </div>
+
+        <div class="col-12">
+            <button type="submit"
+                    class="btn btn-pill btn-mint-outline btn-sm">
+                + Add Certification
+            </button>
+        </div>
     </form>
 </div>
 
-<!-- Projects -->
+<!-- PROJECTS -->
 <div class="card-clean mb-4">
     <h5 class="mb-3">Projects</h5>
-    @foreach (var p in projects)
+
+    @if (!projects.Any())
     {
-        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
-            <div><strong>@p.Title</strong><div class="small text-muted">@p.TechnologiesUsed</div><div class="small">@p.Description</div></div>
+        <p class="text-muted small">No projects added yet.</p>
+    }
+
+    @foreach (var project in projects)
+    {
+        <div class="d-flex justify-content-between align-items-start
+                        gap-3 border-bottom py-3">
+            <div>
+                <strong>@project.Title</strong>
+
+                @if (!string.IsNullOrWhiteSpace(project.TechnologiesUsed))
+                {
+                    <div class="small text-muted mt-1">
+                        Technologies: @project.TechnologiesUsed
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(project.Description))
+                {
+                    <div class="small mt-2"
+                         style="white-space: pre-line;">
+                        @project.Description
+                    </div>
+                }
+            </div>
+
             <form asp-action="DeleteProject" method="post">
-                <input type="hidden" name="id" value="@p.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
-                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+                <input type="hidden" name="id" value="@project.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
+
+                <button type="submit"
+                        class="btn btn-pill btn-ghost btn-sm text-danger">
+                    Remove
+                </button>
             </form>
         </div>
     }
-    <form asp-action="AddProject" method="post" class="row g-2 mt-3">
+
+    <form asp-action="AddProject"
+          method="post"
+          class="row g-3 mt-2">
+
         <input type="hidden" name="resumeId" value="@resume.Id" />
-        <div class="col-md-4"><input name="title" class="form-control" placeholder="Project title" required /></div>
-        <div class="col-md-4"><input name="technologiesUsed" class="form-control" placeholder="Technologies used" /></div>
-        <div class="col-md-4"><input name="description" class="form-control" placeholder="Description" /></div>
-        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Project</button></div>
+
+        <div class="col-md-6">
+            <label for="projectTitle" class="form-label">
+                Project Title
+            </label>
+            <input id="projectTitle"
+                   name="title"
+                   class="form-control"
+                   maxlength="200"
+                   required />
+        </div>
+
+        <div class="col-md-6">
+            <label for="projectTechnologies" class="form-label">
+                Technologies Used
+            </label>
+            <input id="projectTechnologies"
+                   name="technologiesUsed"
+                   class="form-control"
+                   placeholder="e.g. ASP.NET Core, SQL Server" />
+        </div>
+
+        <div class="col-12">
+            <label for="projectDescription" class="form-label">
+                Description
+            </label>
+            <textarea id="projectDescription"
+                      name="description"
+                      class="form-control"
+                      rows="3"></textarea>
+        </div>
+
+        <div class="col-12">
+            <button type="submit"
+                    class="btn btn-pill btn-mint-outline btn-sm">
+                + Add Project
+            </button>
+        </div>
     </form>
 </div>
 
-<!-- Extracurricular Activities -->
+<!-- EXTRACURRICULAR ACTIVITIES -->
 <div class="card-clean mb-4">
     <h5 class="mb-3">Extracurricular Activities</h5>
-    @foreach (var a in activities)
+
+    @if (!activities.Any())
     {
-        <div class="d-flex justify-content-between align-items-start border-bottom py-2">
-            <div><strong>@a.ActivityName</strong> — @a.RoleOrPosition<div class="small">@a.Description</div></div>
+        <p class="text-muted small">No activities added yet.</p>
+    }
+
+    @foreach (var activity in activities)
+    {
+        <div class="d-flex justify-content-between align-items-start
+                        gap-3 border-bottom py-3">
+            <div>
+                <strong>@activity.ActivityName</strong>
+                <div class="small text-muted">@activity.RoleOrPosition</div>
+
+                @if (!string.IsNullOrWhiteSpace(activity.Description))
+                {
+                    <div class="small mt-2"
+                         style="white-space: pre-line;">
+                        @activity.Description
+                    </div>
+                }
+            </div>
+
             <form asp-action="DeleteActivity" method="post">
-                <input type="hidden" name="id" value="@a.Id" /><input type="hidden" name="resumeId" value="@resume.Id" />
-                <button class="btn btn-pill btn-ghost btn-sm text-danger">Remove</button>
+                <input type="hidden" name="id" value="@activity.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
+
+                <button type="submit"
+                        class="btn btn-pill btn-ghost btn-sm text-danger">
+                    Remove
+                </button>
             </form>
         </div>
     }
-    <form asp-action="AddActivity" method="post" class="row g-2 mt-3">
+
+    <form asp-action="AddActivity"
+          method="post"
+          class="row g-3 mt-2">
+
         <input type="hidden" name="resumeId" value="@resume.Id" />
-        <div class="col-md-4"><input name="activityName" class="form-control" placeholder="Activity" required /></div>
-        <div class="col-md-4"><input name="roleOrPosition" class="form-control" placeholder="Role / position" /></div>
-        <div class="col-md-4"><input name="description" class="form-control" placeholder="Description" /></div>
-        <div class="col-12"><button class="btn btn-pill btn-mint-outline btn-sm mt-1">+ Add Activity</button></div>
+
+        <div class="col-md-6">
+            <label for="activityName" class="form-label">
+                Activity Name
+            </label>
+            <input id="activityName"
+                   name="activityName"
+                   class="form-control"
+                   maxlength="200"
+                   required />
+        </div>
+
+        <div class="col-md-6">
+            <label for="activityRole" class="form-label">
+                Role / Position
+            </label>
+            <input id="activityRole"
+                   name="roleOrPosition"
+                   class="form-control"
+                   placeholder="e.g. Member, Volunteer, Coordinator" />
+        </div>
+
+        <div class="col-12">
+            <label for="activityDescription" class="form-label">
+                Description
+            </label>
+            <textarea id="activityDescription"
+                      name="description"
+                      class="form-control"
+                      rows="3"></textarea>
+        </div>
+
+        <div class="col-12">
+            <button type="submit"
+                    class="btn btn-pill btn-mint-outline btn-sm">
+                + Add Activity
+            </button>
+        </div>
     </form>
 </div>
 
-<a asp-action="MyResumes" class="btn btn-ghost">&larr; Back to My Resumes</a>
+<a asp-action="MyResumes" class="btn btn-pill btn-ghost mb-4">
+    &larr; Back to My Resumes
+</a>
+
+<script>
+    document.querySelectorAll(".resume-date-form").forEach(form => {
+        const start = form.querySelector('[name="startDate"]');
+        const end = form.querySelector('[name="endDate"]');
+
+        function validateDates() {
+            end.min = start.value || "";
+
+            const invalid =
+                start.value &&
+                end.value &&
+                end.value < start.value;
+
+            end.setCustomValidity(
+                invalid
+                    ? "End date cannot be earlier than start date."
+                    : ""
+            );
+        }
+
+        start.addEventListener("input", validateDates);
+        start.addEventListener("change", validateDates);
+
+        end.addEventListener("input", validateDates);
+        end.addEventListener("change", validateDates);
+
+        form.addEventListener("submit", event => {
+            validateDates();
+
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                form.reportValidity();
+            }
+        });
+
+        validateDates();
+    });
+</script>

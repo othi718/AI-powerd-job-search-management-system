@@ -24,7 +24,8 @@ namespace AI_powerd_job_search_management_system.Controllers
             _userManager = userManager;
         }
 
-        // EMPLOYER DASHBOARD
+        // EMPLOYER DASHBOARD & job listings
+
         public async Task<IActionResult> Index(string? search, string? status)
         {
             var employer = await GetCurrentEmployerAsync();
@@ -189,7 +190,7 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             int notificationCount = 0;
 
-            // 6. COMPARE JOB SKILLS WITH JOB SEEKER SKILLS
+            // 6. COMPARE JOB SKILLS WITH JOB SEEKER SKILLS & match percentage
             foreach (var seeker in jobSeekers)
             {
                 var candidateSkills = seeker.Skills
@@ -702,6 +703,52 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             ViewBag.Job = job;
             return View(applications);
+        }
+        //Appliction Details: view applicant's resume, skills, and AI analysis
+        [HttpGet]
+        public async Task<IActionResult> ApplicantDetails(int applicationId)
+        {
+            var employer = await GetCurrentEmployerAsync();
+
+            if (employer == null)
+                return RedirectToAction("CompleteProfile");
+
+            var application = await _context.JobApplications
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(a => a.Job)
+                .Include(a => a.JobSeeker)
+                    .ThenInclude(js => js!.ApplicationUser)
+                .Include(a => a.JobSeeker)
+                    .ThenInclude(js => js!.Skills)
+                        .ThenInclude(s => s.Skill)
+                .Include(a => a.Resume)
+                    .ThenInclude(r => r!.Educations)
+                .Include(a => a.Resume)
+                    .ThenInclude(r => r!.Experiences)
+                .Include(a => a.Resume)
+                    .ThenInclude(r => r!.Certifications)
+                .Include(a => a.Resume)
+                    .ThenInclude(r => r!.Projects)
+                .Include(a => a.Resume)
+                    .ThenInclude(r => r!.ExtracurricularActivities)
+                .Include(a => a.AIAnalysis)
+                .FirstOrDefaultAsync(a =>
+                    a.Id == applicationId &&
+                    a.Job!.EmployerId == employer.Id);
+
+            if (application == null)
+                return NotFound();
+
+            // Ensure the submitted resume belongs to this applicant.
+            if (application.JobSeeker == null ||
+                application.Resume == null ||
+                application.Resume.JobSeekerId != application.JobSeekerId)
+            {
+                return NotFound();
+            }
+
+            return View(application);
         }
 
         // UPDATE APPLICATION STATUS

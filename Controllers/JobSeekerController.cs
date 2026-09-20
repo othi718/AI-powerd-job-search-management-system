@@ -464,15 +464,71 @@ namespace AI_powerd_job_search_management_system.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddEducation(int resumeId, string institution, string? degree, string? fieldOfStudy, DateTime? startDate, DateTime? endDate)
+        public async Task<IActionResult> AddEducation(
+     int resumeId,
+     string institution,
+     string? degree,
+     string? fieldOfStudy,
+     DateTime? startDate,
+     DateTime? endDate)
         {
             var resume = await GetOwnedResumeAsync(resumeId);
-            if (resume == null) return NotFound();
-            if (!string.IsNullOrWhiteSpace(institution))
+
+            if (resume == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
             {
-                _context.Educations.Add(new Education { ResumeId = resumeId, Institution = institution, Degree = degree, FieldOfStudy = fieldOfStudy, StartDate = startDate, EndDate = endDate });
-                await _context.SaveChangesAsync();
+                TempData["ResumeError"] =
+                    "Education could not be saved. Check the fields and dates.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
             }
+
+            if (string.IsNullOrWhiteSpace(institution))
+            {
+                TempData["ResumeError"] = "Please enter the institution name.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
+            }
+
+            institution = institution.Trim();
+            degree = degree?.Trim();
+            fieldOfStudy = fieldOfStudy?.Trim();
+
+            if (institution.Length > 200 ||
+                (degree?.Length ?? 0) > 150 ||
+                (fieldOfStudy?.Length ?? 0) > 150)
+            {
+                TempData["ResumeError"] =
+                    "Institution must be within 200 characters. " +
+                    "Degree and field of study must be within 150 characters.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
+            }
+
+            if (startDate.HasValue &&
+                endDate.HasValue &&
+                endDate.Value.Date < startDate.Value.Date)
+            {
+                TempData["ResumeError"] =
+                    "Education end date cannot be earlier than the start date.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
+            }
+
+            _context.Educations.Add(new Education
+            {
+                ResumeId = resumeId,
+                Institution = institution,
+                Degree = degree,
+                FieldOfStudy = fieldOfStudy,
+                StartDate = startDate?.Date,
+                EndDate = endDate?.Date
+            });
+
+            await _context.SaveChangesAsync();
+
             return RedirectToAction("ResumeDetails", new { resumeId });
         }
 
@@ -489,15 +545,69 @@ namespace AI_powerd_job_search_management_system.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddExperience(int resumeId, string companyName, string jobTitle, DateTime? startDate, DateTime? endDate, string? description)
+        public async Task<IActionResult> AddExperience(
+    int resumeId,
+    string companyName,
+    string jobTitle,
+    DateTime? startDate,
+    DateTime? endDate,
+    string? description)
         {
             var resume = await GetOwnedResumeAsync(resumeId);
-            if (resume == null) return NotFound();
-            if (!string.IsNullOrWhiteSpace(companyName) && !string.IsNullOrWhiteSpace(jobTitle))
+
+            if (resume == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
             {
-                _context.Experiences.Add(new Experience { ResumeId = resumeId, CompanyName = companyName, JobTitle = jobTitle, StartDate = startDate, EndDate = endDate, Description = description });
-                await _context.SaveChangesAsync();
+                TempData["ResumeError"] =
+                    "Experience could not be saved. Check the fields and dates.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
             }
+
+            if (string.IsNullOrWhiteSpace(companyName) ||
+                string.IsNullOrWhiteSpace(jobTitle))
+            {
+                TempData["ResumeError"] =
+                    "Please enter both the company name and job title.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
+            }
+
+            companyName = companyName.Trim();
+            jobTitle = jobTitle.Trim();
+
+            if (companyName.Length > 150 || jobTitle.Length > 150)
+            {
+                TempData["ResumeError"] =
+                    "Company name and job title must each be within 150 characters.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
+            }
+
+            if (startDate.HasValue &&
+                endDate.HasValue &&
+                endDate.Value.Date < startDate.Value.Date)
+            {
+                TempData["ResumeError"] =
+                    "Experience end date cannot be earlier than the start date.";
+
+                return RedirectToAction("ResumeDetails", new { resumeId });
+            }
+
+            _context.Experiences.Add(new Experience
+            {
+                ResumeId = resumeId,
+                CompanyName = companyName,
+                JobTitle = jobTitle,
+                StartDate = startDate?.Date,
+                EndDate = endDate?.Date,
+                Description = description?.Trim()
+            });
+
+            await _context.SaveChangesAsync();
+
             return RedirectToAction("ResumeDetails", new { resumeId });
         }
 
