@@ -1,141 +1,297 @@
 ﻿@model AI_powerd_job_search_management_system.Models.JobSeeker
+@using AI_powerd_job_search_management_system.Models
 
 @{
     ViewData["Title"] = "My Profile";
+
+    var resume = ViewBag.ActiveResume as Resume;
+
+    var skills = Model.Skills
+        .Where(s => s.Skill != null)
+        .Select(s => s.Skill!.Name)
+        .Distinct()
+        .OrderBy(name => name)
+        .ToList();
 }
 
-<div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-2">
+<div class="page-header d-flex justify-content-between
+            align-items-start flex-wrap gap-3">
     <div>
         <h2>My Profile</h2>
-        <p>How employers see you</p>
+        <p>Your personal information and resume details in one place.</p>
     </div>
 
-    <a asp-action="EditProfile"
+    <a asp-controller="JobSeeker"
+       asp-action="EditProfile"
        class="btn btn-pill btn-mint-outline">
+        <i class="bi bi-pencil me-1"></i>
         Edit profile
     </a>
 </div>
 
-<div class="card-clean" style="max-width: 640px;">
+<!-- PERSONAL INFORMATION -->
+<div class="card-clean mb-4">
+    <h4 class="mb-4">Personal Profile</h4>
 
-    <h4 class="mb-1">
-        @ViewBag.FullName
-    </h4>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <strong>Full name</strong>
+            <div>@ViewBag.FullName</div>
+        </div>
 
-    <p class="text-muted mb-4">
-        @ViewBag.Email
-    </p>
+        <div class="col-md-6">
+            <strong>Email</strong>
+            <div>@ViewBag.Email</div>
+        </div>
 
-    <p>
-        <strong>Location:</strong>
-        @(Model.Location ?? "Not set")
-    </p>
+        <div class="col-md-6">
+            <strong>Location</strong>
+            <div>
+                @(string.IsNullOrWhiteSpace(Model.Location)
+                    ? "Not provided"
+                    : Model.Location)
+            </div>
+        </div>
 
-    <h5 class="mt-4">Bio</h5>
+        <div class="col-12">
+            <strong>About</strong>
+            <div class="mt-1"
+                 style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.Bio) ? "Not provided" : Model.Bio)</div>
+        </div>
+    </div>
+</div>
 
-    <p class="text-muted"
-       style="white-space: pre-wrap;">
-        @(Model.Bio ?? "No bio added yet.")
-    </p>
+<!-- SKILLS -->
+<div class="card-clean mb-4">
+    <div class="d-flex justify-content-between
+                align-items-center flex-wrap gap-2 mb-3">
+        <h4 class="mb-0">Skills</h4>
 
-    <hr />
-
-    <div class="d-flex justify-content-between align-items-center">
-
-        <h5>My Skills</h5>
-
-        <a asp-action="Skills"
-           class="btn btn-sm btn-ink">
-            Manage Skills
+        <a asp-controller="JobSeeker"
+           asp-action="Skills"
+           class="btn btn-pill btn-mint-outline btn-sm">
+            Manage skills
         </a>
-
     </div>
 
-    <div class="mt-3">
+    @if (skills.Any())
+    {
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var skill in skills)
+            {
+                <span class="border rounded-pill px-3 py-2">
+                    @skill
+                </span>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mb-0">No skills added.</p>
+    }
+</div>
 
-        @if (Model.Skills != null && Model.Skills.Any())
-        {
-            <div class="d-flex flex-wrap gap-2">
+<!-- RESUME -->
+<!-- RESUME LIST LINK -->
+<div class="card-clean mb-4">
+    <div class="d-flex justify-content-between
+                align-items-center flex-wrap gap-3">
+        <div>
+            <h4 class="mb-1">My Resumes</h4>
 
-                @foreach (var skill in Model.Skills)
-                {
-                    <span class="badge bg-dark rounded-pill px-3 py-2">
-                        @skill.Skill?.Name
-                    </span>
-                }
-
-            </div>
-        }
-        else
-        {
-            <p class="text-muted">
-                No skills added yet.
+            <p class="text-muted mb-0">
+                Open your resume list to view your uploaded resumes.
             </p>
-        }
-        @{
-            var resume = (AI_powerd_job_search_management_system.Models.Resume?)ViewBag.ActiveResume;
-        }
-        <hr />
-        @if (resume == null)
-        {
-            <p class="text-muted mb-0">No resume uploaded yet.</p>
-        }
-        else
-        {
-            <div class="d-flex gap-2 mb-3">
+        </div>
 
-                <a asp-action="ResumeDetails" asp-route-resumeId="@resume.Id" class="btn btn-pill btn-ink btn-sm">+ Add Education / Experience / Certificates</a>
-            </div>
-
-            @if (resume.Educations.Any())
-            {
-                <h5>Education</h5>
-                @foreach (var e in resume.Educations)
-                {
-                    <p class="mb-1"><strong>@e.Institution</strong> — @e.Degree @(e.FieldOfStudy != null ? $"in {e.FieldOfStudy}" : "")</p>
-                }
-            }
-            @if (resume.Experiences.Any())
-            {
-                <h5 class="mt-3">Experience</h5>
-                @foreach (var e in resume.Experiences)
-                {
-                    <p class="mb-1"><strong>@e.JobTitle</strong> at @e.CompanyName</p>
-                }
-            }
-            @if (resume.Certifications.Any())
-            {
-                <h5 class="mt-3">Certifications</h5>
-                @foreach (var c in resume.Certifications)
-                {
-                    <p class="mb-1">@c.Name — @c.IssuingOrganization</p>
-                }
-            }
-            @if (resume.Projects.Any())
-            {
-                <h5 class="mt-3">Projects</h5>
-                @foreach (var p in resume.Projects)
-                {
-                    <p class="mb-1"><strong>@p.Title</strong> — @p.TechnologiesUsed</p>
-                }
-            }
-            @if (resume.ExtracurricularActivities.Any())
-            {
-                <h5 class="mt-3">Extracurricular Activities</h5>
-                @foreach (var a in resume.ExtracurricularActivities)
-                {
-                    <p class="mb-1">@a.ActivityName — @a.RoleOrPosition</p>
-                }
-            }
-        }
-
+        <a asp-controller="JobSeeker"
+           asp-action="MyResumes"
+           class="btn btn-pill btn-mint-outline">
+            My Resumes
+        </a>
     </div>
 
-    <hr />
+    @if (resume != null)
+    {
+        <p class="text-muted small mt-3 mb-0">
+            Education, experience and other details below are
+            from: @resume.OriginalFileName
+        </p>
+    }
+</div>
 
-    <a asp-action="MyResumes"
-       class="btn btn-pill btn-ink">
-        Manage resumes
-    </a>
+<!-- EDUCATION -->
+<div class="card-clean mb-4">
+    <h4 class="mb-3">Education</h4>
 
+    @if (resume == null || !resume.Educations.Any())
+    {
+        <p class="text-muted mb-0">No education details added.</p>
+    }
+    else
+    {
+        @foreach (var education in resume.Educations
+            .OrderByDescending(e => e.StartDate))
+        {
+            <div class="border-bottom py-3">
+                <h5 class="mb-1">@education.Institution</h5>
+
+                <div>
+                    @education.Degree
+
+                    @if (!string.IsNullOrWhiteSpace(education.FieldOfStudy))
+                    {
+                        <span> — @education.FieldOfStudy</span>
+                    }
+                </div>
+
+                <div class="small text-muted mt-2">
+                    <strong>Start:</strong>
+                    @(education.StartDate?.ToString("MMM yyyy")
+                        ?? "Not provided")
+
+                    <span class="mx-2">&middot;</span>
+
+                    <strong>End / Expected graduation:</strong>
+                    @(education.EndDate?.ToString("MMM yyyy")
+                        ?? "Ongoing / not provided")
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- EXPERIENCE -->
+<div class="card-clean mb-4">
+    <h4 class="mb-3">Experience</h4>
+
+    @if (resume == null || !resume.Experiences.Any())
+    {
+        <p class="text-muted mb-0">No experience details added.</p>
+    }
+    else
+    {
+        @foreach (var experience in resume.Experiences
+            .OrderByDescending(e => e.StartDate))
+        {
+            <div class="border-bottom py-3">
+                <h5 class="mb-1">@experience.JobTitle</h5>
+
+                <div>@experience.CompanyName</div>
+
+                <div class="small text-muted mt-2">
+                    <strong>Start:</strong>
+                    @(experience.StartDate?.ToString("MMM yyyy")
+                        ?? "Not provided")
+
+                    <span class="mx-2">&middot;</span>
+
+                    <strong>End:</strong>
+                    @(experience.EndDate?.ToString("MMM yyyy")
+                        ?? "Present / not provided")
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(experience.Description))
+                {
+                    <div class="mt-2"
+                         style="white-space: pre-line;">@experience.Description</div>
+                }
+            </div>
+        }
+    }
+</div>
+
+<!-- CERTIFICATIONS -->
+<div class="card-clean mb-4">
+    <h4 class="mb-3">Certifications</h4>
+
+    @if (resume == null || !resume.Certifications.Any())
+    {
+        <p class="text-muted mb-0">No certifications added.</p>
+    }
+    else
+    {
+        @foreach (var certificate in resume.Certifications
+            .OrderByDescending(c => c.DateIssued))
+        {
+            <div class="border-bottom py-3">
+                <h5 class="mb-1">@certificate.Name</h5>
+
+                <div>
+                    @(string.IsNullOrWhiteSpace(certificate.IssuingOrganization)
+                        ? "Issuing organization not provided"
+                        : certificate.IssuingOrganization)
+                </div>
+
+                <div class="small text-muted mt-2">
+                    <strong>Issue date:</strong>
+                    @(certificate.DateIssued?.ToString("MMM yyyy")
+                        ?? "Not provided")
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- PROJECTS -->
+<div class="card-clean mb-4">
+    <h4 class="mb-3">Projects</h4>
+
+    @if (resume == null || !resume.Projects.Any())
+    {
+        <p class="text-muted mb-0">No projects added.</p>
+    }
+    else
+    {
+        @foreach (var project in resume.Projects)
+        {
+            <div class="border-bottom py-3">
+                <h5 class="mb-1">@project.Title</h5>
+
+                @if (!string.IsNullOrWhiteSpace(project.TechnologiesUsed))
+                {
+                    <div class="small text-muted mt-2">
+                        <strong>Technologies:</strong>
+                        @project.TechnologiesUsed
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(project.Description))
+                {
+                    <div class="mt-2"
+                         style="white-space: pre-line;">@project.Description</div>
+                }
+            </div>
+        }
+    }
+</div>
+
+<!-- EXTRACURRICULAR ACTIVITIES -->
+<div class="card-clean mb-4">
+    <h4 class="mb-3">Extracurricular Activities</h4>
+
+    @if (resume == null || !resume.ExtracurricularActivities.Any())
+    {
+        <p class="text-muted mb-0">No extracurricular activities added.</p>
+    }
+    else
+    {
+        @foreach (var activity in resume.ExtracurricularActivities)
+        {
+            <div class="border-bottom py-3">
+                <h5 class="mb-1">@activity.ActivityName</h5>
+
+                @if (!string.IsNullOrWhiteSpace(activity.RoleOrPosition))
+                {
+                    <div class="text-muted">@activity.RoleOrPosition</div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(activity.Description))
+                {
+                    <div class="mt-2"
+                         style="white-space: pre-line;">@activity.Description</div>
+                }
+            </div>
+        }
+    }
 </div>
