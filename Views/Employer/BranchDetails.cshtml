@@ -1,227 +1,195 @@
 ﻿@model AI_powerd_job_search_management_system.Models.Branch
+@using AI_powerd_job_search_management_system.Models
 
 @{
     ViewData["Title"] = "Branch Details";
-    
 
-    var approvedStaff =
-        ViewBag.ApprovedStaff as
-        List<AI_powerd_job_search_management_system.Models.Employer>
-        ?? new List<AI_powerd_job_search_management_system.Models.Employer>();
+    var jobs = ViewBag.Jobs as List<Job> ?? new List<Job>();
 
-    var pendingStaff =
-        ViewBag.PendingStaff as
-        List<AI_powerd_job_search_management_system.Models.Employer>
-        ?? new List<AI_powerd_job_search_management_system.Models.Employer>();
+    var hasLocation = !string.IsNullOrWhiteSpace(Model.Location);
+    var location = Model.Location?.Trim() ?? "";
 
-    var jobs =
-        ViewBag.Jobs as
-        List<AI_powerd_job_search_management_system.Models.Job>
-        ?? new List<AI_powerd_job_search_management_system.Models.Job>();
+    var encodedLocation = System.Uri.EscapeDataString(location);
+
+    var mapEmbedUrl =
+        $"https://maps.google.com/maps?q={encodedLocation}&z=15&output=embed";
+
+    var mapSearchUrl =
+        $"https://www.google.com/maps/search/?api=1&query={encodedLocation}";
+
+    var directionsUrl =
+        $"https://www.google.com/maps/dir/?api=1&destination={encodedLocation}";
+
+    var openJobs = jobs.Count(j => j.Status == JobStatus.Open);
+    var closedJobs = jobs.Count(j => j.Status == JobStatus.Closed);
+
+    bool canPostJob = ViewBag.CanPostJob is bool allowed && allowed;
 }
 
-<div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-2">
+<div class="page-header d-flex justify-content-between
+            align-items-start flex-wrap gap-3">
+
     <div>
-        <a asp-action="Branches"
+        <a asp-controller="Employer"
+           asp-action="Branches"
            class="text-decoration-none text-muted small">
             <i class="bi bi-arrow-left me-1"></i>
             Back to branches
         </a>
 
-        <h2 class="mt-2">@Model.Name</h2>
+        <h2 class="mt-3 mb-2">@Model.Name</h2>
 
-        <p class="mb-0">
+        @if (Model.Company != null)
+        {
+            <p class="mb-2">
+                <i class="bi bi-building me-1"></i>
+                @Model.Company.Name
+            </p>
+        }
+
+        <p class="text-muted mb-0">
             <i class="bi bi-geo-alt me-1"></i>
-            @(Model.Location ?? "No location set")
+            @(hasLocation ? location : "No location set")
         </p>
     </div>
 
-    <a asp-action="CreateJob"
-       class="btn btn-pill btn-ink">
-        <i class="bi bi-plus-lg me-1"></i>
-        Post a job
-    </a>
+    @if (canPostJob)
+    {
+        <a asp-controller="Employer"
+           asp-action="CreateJob"
+           class="btn btn-pill btn-ink">
+            <i class="bi bi-plus-lg me-1"></i>
+            Post a job
+        </a>
+    }
 </div>
 
+<!-- JOB SUMMARY -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="card-clean h-100">
-            <p class="text-muted small mb-1">Approved staff</p>
-            <h3 class="mb-0">@approvedStaff.Count / 3</h3>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card-clean h-100">
-            <p class="text-muted small mb-1">Pending requests</p>
-            <h3 class="mb-0">@pendingStaff.Count</h3>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card-clean h-100">
-            <p class="text-muted small mb-1">Jobs posted</p>
+            <p class="text-muted small mb-2">
+                <i class="bi bi-briefcase me-1"></i>
+                Total jobs posted
+            </p>
             <h3 class="mb-0">@jobs.Count</h3>
         </div>
     </div>
-</div>
 
-<div class="card-clean p-0 mb-4">
-    <div class="p-4 border-bottom">
-        <h4 class="mb-1">Pending employee requests</h4>
-        <p class="text-muted mb-0">
-            Employees who selected @Model.Name when requesting to join.
-        </p>
+    <div class="col-md-4">
+        <div class="card-clean h-100">
+            <p class="text-muted small mb-2">
+                <i class="bi bi-check-circle me-1"></i>
+                Open jobs
+            </p>
+            <h3 class="mb-0">@openJobs</h3>
+        </div>
     </div>
 
-    @if (!pendingStaff.Any())
-    {
-        <div class="text-center py-5">
-            <p class="text-muted mb-0">
-                No pending requests for this branch.
+    <div class="col-md-4">
+        <div class="card-clean h-100">
+            <p class="text-muted small mb-2">
+                <i class="bi bi-lock me-1"></i>
+                Closed jobs
             </p>
+            <h3 class="mb-0">@closedJobs</h3>
         </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead>
-                    <tr class="text-muted small text-uppercase">
-                        <th class="ps-4">Name</th>
-                        <th>Email</th>
-                        <th>Requested position</th>
-                        <th>Job title</th>
-                        <th class="pe-4">Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var employee in pendingStaff)
-                    {
-                        <tr>
-                            <td class="ps-4 fw-semibold">
-                                @employee.ApplicationUser?.FullName
-                            </td>
-
-                            <td class="text-muted">
-                                @employee.ApplicationUser?.Email
-                            </td>
-
-                            <td>@employee.Position</td>
-
-                            <td>@employee.JobTitle</td>
-
-                            <td class="pe-4">
-                                <div class="d-flex gap-1">
-                                    @if (approvedStaff.Count < 3)
-                                    {
-                                        <form asp-action="ApproveStaff"
-                                              method="post"
-                                              class="d-inline">
-
-                                            <input type="hidden"
-                                                   name="employerId"
-                                                   value="@employee.Id" />
-
-                                            <input type="hidden"
-                                                   name="branchId"
-                                                   value="@Model.Id" />
-
-                                            <button type="submit"
-                                                    class="btn btn-pill btn-ink btn-sm">
-                                                Approve
-                                            </button>
-                                        </form>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-pill btn-ghost btn-sm"
-                                                disabled>
-                                            Branch full
-                                        </button>
-                                    }
-
-                                    <form asp-action="RejectStaff"
-                                          method="post"
-                                          class="d-inline">
-
-                                        <input type="hidden"
-                                               name="employerId"
-                                               value="@employee.Id" />
-
-                                        <input type="hidden"
-                                               name="branchId"
-                                               value="@Model.Id" />
-
-                                        <button type="submit"
-                                                class="btn btn-pill btn-ghost btn-sm text-danger">
-                                            Reject
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
+    </div>
 </div>
 
-<div class="card-clean p-0 mb-4">
-    <div class="p-4 border-bottom">
-        <h4 class="mb-1">Approved branch management</h4>
-        <p class="text-muted mb-0">
-            These employees can post jobs for this branch.
-        </p>
+<!-- BRANCH INFORMATION AND MAP -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="card-clean h-100">
+            <h4 class="mb-4">Branch information</h4>
+
+            <div class="mb-4">
+                <p class="text-muted small mb-1">Branch name</p>
+                <div class="fw-semibold">@Model.Name</div>
+            </div>
+
+            @if (Model.Company != null)
+            {
+                <div class="mb-4">
+                    <p class="text-muted small mb-1">Company</p>
+                    <div class="fw-semibold">@Model.Company.Name</div>
+                </div>
+            }
+
+            <div class="mb-4">
+                <p class="text-muted small mb-1">Address / Location</p>
+                <div>
+                    @(hasLocation ? location : "No location provided.")
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-muted small mb-1">Branch added</p>
+                <div>@Model.CreatedAt.ToString("dd MMM yyyy")</div>
+            </div>
+
+            @if (hasLocation)
+            {
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="@mapSearchUrl"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-pill btn-mint-outline btn-sm">
+                        <i class="bi bi-map me-1"></i>
+                        Open Google Maps
+                    </a>
+
+                    <a href="@directionsUrl"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-pill btn-ghost btn-sm">
+                        <i class="bi bi-signpost-2 me-1"></i>
+                        Get directions
+                    </a>
+                </div>
+            }
+        </div>
     </div>
 
-    @if (!approvedStaff.Any())
-    {
-        <div class="text-center py-5">
-            <p class="text-muted mb-0">
-                No employees have been approved for this branch.
-            </p>
+    <div class="col-lg-8">
+        <div class="card-clean p-0 h-100 overflow-hidden">
+            <div class="p-4 border-bottom">
+                <h4 class="mb-1">Branch location</h4>
+                <p class="text-muted mb-0">
+                    Find @Model.Name on the map.
+                </p>
+            </div>
+
+            @if (hasLocation)
+            {
+                <iframe src="@mapEmbedUrl"
+                        title="Map showing the location of @Model.Name"
+                        width="100%"
+                        height="380"
+                        style="border: 0; display: block;"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        allowfullscreen>
+                </iframe>
+            }
+            else
+            {
+                <div class="d-flex flex-column justify-content-center
+                            align-items-center text-center p-4"
+                     style="min-height: 380px;">
+                    <i class="bi bi-geo-alt fs-1 text-muted mb-3"></i>
+                    <h5>Location not available</h5>
+                    <p class="text-muted mb-0">
+                        No address has been provided for this branch.
+                    </p>
+                </div>
+            }
         </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead>
-                    <tr class="text-muted small text-uppercase">
-                        <th class="ps-4">Name</th>
-                        <th>Email</th>
-                        <th>Position</th>
-                        <th class="pe-4">Job title</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var employee in approvedStaff)
-                    {
-                        <tr>
-                            <td class="ps-4 fw-semibold">
-                                @employee.ApplicationUser?.FullName
-                            </td>
-
-                            <td class="text-muted">
-                                @employee.ApplicationUser?.Email
-                            </td>
-
-                            <td>@employee.Position</td>
-
-                            <td class="pe-4">@employee.JobTitle</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
+    </div>
 </div>
 
-<div class="card-clean p-0">
+<!-- BRANCH JOBS -->
+<div class="card-clean p-0 mb-4">
     <div class="p-4 border-bottom">
         <h4 class="mb-1">Branch jobs</h4>
         <p class="text-muted mb-0">
@@ -231,7 +199,8 @@
 
     @if (!jobs.Any())
     {
-        <div class="text-center py-5">
+        <div class="text-center py-5 px-3">
+            <i class="bi bi-briefcase fs-1 text-muted d-block mb-3"></i>
             <p class="text-muted mb-0">
                 No jobs have been posted for this branch.
             </p>
@@ -243,10 +212,12 @@
             <table class="table align-middle mb-0">
                 <thead>
                     <tr class="text-muted small text-uppercase">
-                        <th class="ps-4">Job</th>
+                        <th class="ps-4">Job title</th>
+                        <th>Location</th>
                         <th>Posted by</th>
                         <th>Status</th>
-                        <th class="pe-4">Posted</th>
+                        <th>Posted</th>
+                        <th class="pe-4">Deadline</th>
                     </tr>
                 </thead>
 
@@ -254,16 +225,37 @@
                     @foreach (var job in jobs)
                     {
                         <tr>
-                            <td class="ps-4 fw-semibold">@job.Title</td>
-
-                            <td>
-                                @job.Employer?.ApplicationUser?.FullName
+                            <td class="ps-4 fw-semibold">
+                                @job.Title
                             </td>
 
-                            <td>@job.Status</td>
+                            <td class="text-muted">
+                                @(string.IsNullOrWhiteSpace(job.Location)
+                                    ? "Not specified"
+                                    : job.Location)
+                            </td>
 
-                            <td class="pe-4 text-muted">
+                            <td>
+                                @(job.Employer?.ApplicationUser?.FullName
+                                    ?? "Not available")
+                            </td>
+
+                            <td>
+                                <span class="badge-pill @(job.Status == JobStatus.Open
+                                    ? "badge-open"
+                                    : "badge-closed")">
+                                    <span class="status-dot"></span>
+                                    @job.Status
+                                </span>
+                            </td>
+
+                            <td class="text-muted text-nowrap">
                                 @job.PostedAt.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td class="pe-4 text-muted text-nowrap">
+                                @(job.Deadline?.ToString("dd MMM yyyy")
+                                    ?? "Not specified")
                             </td>
                         </tr>
                     }

@@ -194,10 +194,11 @@
             setCompanyAndBranches
         );
 
-        joinCompanyForm.addEventListener(
+           joinCompanyForm.addEventListener(
             "submit",
             function (event) {
-                setCompanyAndBranches();
+                // Do NOT call setCompanyAndBranches() here — it rebuilds the
+                // branch dropdown and would wipe out whatever the user just selected.
 
                 if (!companyId.value) {
                     event.preventDefault();
@@ -214,6 +215,13 @@
 
                 if (!branchSelect.value) {
                     event.preventDefault();
+
+                    companyMessage.textContent =
+                        "Please select a branch.";
+
+                    companyMessage.className =
+                        "text-danger d-block mt-1";
+
                     branchSelect.focus();
                 }
             }

@@ -522,9 +522,25 @@
     </form>
 </div>
 
-<a asp-action="MyResumes" class="btn btn-pill btn-ghost mb-4">
-    &larr; Back to My Resumes
-</a>
+<div class="d-flex flex-wrap gap-2 mt-4">
+    <a asp-controller="JobSeeker"
+       asp-action="Profile"
+       class="btn btn-pill btn-ink">
+        Done — View my profile
+    </a>
+
+    <a asp-controller="JobSeeker"
+       asp-action="EditProfile"
+       class="btn btn-pill btn-mint-outline">
+        Back to edit profile
+    </a>
+
+    <a asp-controller="JobSeeker"
+       asp-action="MyResumes"
+       class="btn btn-ghost">
+        My resumes
+    </a>
+</div>
 
 <script>
     document.querySelectorAll(".resume-date-form").forEach(form => {

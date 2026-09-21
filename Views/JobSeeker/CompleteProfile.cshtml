@@ -6,19 +6,71 @@
 
 <div class="page-header">
     <h2>Tell us a bit about yourself</h2>
-    <p>This helps employers get to know you before they open your resume.</p>
+    <p>
+        Add your basic information, then continue with
+        your education, experience and certificates.
+    </p>
 </div>
 
-<div class="card-clean" style="max-width: 560px;">
-    <form asp-action="CompleteProfile" method="post">
+<div class="card-clean" style="max-width: 640px;">
+    <form asp-controller="JobSeeker"
+          asp-action="CompleteProfile"
+          method="post">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger small mb-3"></div>
+
         <div class="mb-3">
             <label asp-for="Bio" class="form-label"></label>
-            <textarea asp-for="Bio" class="form-control" rows="4" placeholder="A short intro about your background..."></textarea>
+
+            <textarea asp-for="Bio"
+                      class="form-control"
+                      rows="4"
+                      placeholder="A short intro about your background..."></textarea>
+
+            <span asp-validation-for="Bio"
+                  class="text-danger small"></span>
         </div>
+
         <div class="mb-4">
             <label asp-for="Location" class="form-label"></label>
-            <input asp-for="Location" class="form-control" placeholder="e.g. Dhaka, Bangladesh" />
+
+            <input asp-for="Location"
+                   class="form-control"
+                   placeholder="e.g. Dhaka, Bangladesh" />
+
+            <span asp-validation-for="Location"
+                  class="text-danger small"></span>
         </div>
-        <button type="submit" class="btn btn-pill btn-ink">Save and continue</button>
+
+        <button type="submit"
+                name="next"
+                value="profile"
+                class="btn btn-pill btn-ink">
+            Save profile
+        </button>
+
+        <hr class="my-4" />
+
+        <h5>Education, experience and certificates</h5>
+
+        <p class="text-muted small">
+            Save your profile and continue to your resume details.
+            If you have not uploaded a resume yet, you will be
+            asked to upload one first.
+        </p>
+
+        <button type="submit"
+                name="next"
+                value="resumeDetails"
+                class="btn btn-pill btn-mint-outline">
+            + Add Education / Experience / Certificates
+        </button>
     </form>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

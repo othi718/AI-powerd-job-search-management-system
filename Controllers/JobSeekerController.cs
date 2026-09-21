@@ -132,51 +132,68 @@ namespace AI_powerd_job_search_management_system.Controllers
 
 
         // COMPLETE PROFILE - GET
-    
         [HttpGet]
-        public IActionResult CompleteProfile()
+        public async Task<IActionResult> CompleteProfile()
         {
+            var jobSeeker = await GetCurrentJobSeekerAsync();
+
+            if (jobSeeker != null)
+                return RedirectToAction(nameof(EditProfile));
+
             return View(new CompleteJobSeekerProfileViewModel());
         }
 
 
         // COMPLETE PROFILE - POST
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteProfile(
-            CompleteJobSeekerProfileViewModel model)
+            CompleteJobSeekerProfileViewModel model,
+            string? next)
         {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Challenge();
+
             if (!ModelState.IsValid)
                 return View(model);
 
-            var userId = _userManager.GetUserId(User);
-
-            var existing = await _context.JobSeekers
+            var jobSeeker = await _context.JobSeekers
                 .FirstOrDefaultAsync(
                     js => js.ApplicationUserId == userId);
 
-            if (existing != null)
-                return RedirectToAction("Index");
-
-            var jobSeeker = new JobSeeker
+            if (jobSeeker == null)
             {
-                ApplicationUserId = userId!,
-                Bio = model.Bio,
-                Location = model.Location
-            };
+                jobSeeker = new JobSeeker
+                {
+                    ApplicationUserId = userId,
+                    Bio = model.Bio,
+                    Location = model.Location
+                };
 
-            _context.JobSeekers.Add(jobSeeker);
+                _context.JobSeekers.Add(jobSeeker);
+            }
+            else
+            {
+                jobSeeker.Bio = model.Bio;
+                jobSeeker.Location = model.Location;
+            }
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            if (next == "resumeDetails")
+            {
+                return await OpenProfileResumeDetailsAsync(jobSeeker.Id);
+            }
+
+            return RedirectToAction(nameof(Profile));
         }
 
 
-     
+
         // MY RESUMES
-      
+
         [HttpGet]
         public async Task<IActionResult> MyResumes()
         {
@@ -231,14 +248,13 @@ namespace AI_powerd_job_search_management_system.Controllers
 
 
         // EDIT PROFILE - GET
-
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
             var jobSeeker = await GetCurrentJobSeekerAsync();
 
             if (jobSeeker == null)
-                return RedirectToAction("CompleteProfile");
+                return RedirectToAction(nameof(CompleteProfile));
 
             var model = new CompleteJobSeekerProfileViewModel
             {
@@ -251,32 +267,37 @@ namespace AI_powerd_job_search_management_system.Controllers
 
 
         // EDIT PROFILE - POST
-    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(
-            CompleteJobSeekerProfileViewModel model)
+            CompleteJobSeekerProfileViewModel model,
+            string? next)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
             var jobSeeker = await GetCurrentJobSeekerAsync();
 
             if (jobSeeker == null)
-                return RedirectToAction("CompleteProfile");
+                return RedirectToAction(nameof(CompleteProfile));
+
+            if (!ModelState.IsValid)
+                return View(model);
 
             jobSeeker.Bio = model.Bio;
             jobSeeker.Location = model.Location;
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Profile");
+            if (next == "resumeDetails")
+            {
+                return await OpenProfileResumeDetailsAsync(jobSeeker.Id);
+            }
+
+            return RedirectToAction(nameof(Profile));
         }
 
 
-    
+
         // UPLOAD RESUME - GET
-       
+
         [HttpGet]
         public IActionResult UploadResume()
         {
@@ -355,7 +376,9 @@ namespace AI_powerd_job_search_management_system.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("MyResumes");
+            return RedirectToAction(
+                nameof(ResumeDetails),
+                new { resumeId = resume.Id });
         }
 
 
@@ -1021,6 +1044,26 @@ namespace AI_powerd_job_search_management_system.Controllers
                 .ToListAsync();
 
             return View(saved);
+        }
+        private async Task<IActionResult> OpenProfileResumeDetailsAsync(
+    int jobSeekerId)
+        {
+            var resumeId = await _context.Resumes
+                .AsNoTracking()
+                .Where(r => r.JobSeekerId == jobSeekerId)
+                .OrderByDescending(r => r.IsActive)
+                .ThenByDescending(r => r.UploadedAt)
+                .Select(r => (int?)r.Id)
+                .FirstOrDefaultAsync();
+
+            if (resumeId.HasValue)
+            {
+                return RedirectToAction(
+                    nameof(ResumeDetails),
+                    new { resumeId = resumeId.Value });
+            }
+
+            return RedirectToAction(nameof(UploadResume));
         }
 
     }

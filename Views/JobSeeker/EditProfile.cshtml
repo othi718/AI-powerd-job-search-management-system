@@ -6,19 +6,74 @@
 
 <div class="page-header">
     <h2>Edit profile</h2>
+    <p>Update your basic information and resume details.</p>
 </div>
 
-<div class="card-clean" style="max-width: 560px;">
-    <form asp-action="EditProfile" method="post">
+<div class="card-clean" style="max-width: 640px;">
+    <form asp-controller="JobSeeker"
+          asp-action="EditProfile"
+          method="post">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger small mb-3"></div>
+
         <div class="mb-3">
             <label asp-for="Bio" class="form-label"></label>
-            <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+
+            <textarea asp-for="Bio"
+                      class="form-control"
+                      rows="4"></textarea>
+
+            <span asp-validation-for="Bio"
+                  class="text-danger small"></span>
         </div>
+
         <div class="mb-4">
             <label asp-for="Location" class="form-label"></label>
-            <input asp-for="Location" class="form-control" />
+
+            <input asp-for="Location"
+                   class="form-control" />
+
+            <span asp-validation-for="Location"
+                  class="text-danger small"></span>
         </div>
-        <button type="submit" class="btn btn-pill btn-ink">Save changes</button>
-        <a asp-action="Profile" class="btn btn-ghost">Cancel</a>
+
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit"
+                    name="next"
+                    value="profile"
+                    class="btn btn-pill btn-ink">
+                Save changes
+            </button>
+
+            <a asp-controller="JobSeeker"
+               asp-action="Profile"
+               class="btn btn-ghost">
+                Cancel
+            </a>
+        </div>
+
+        <hr class="my-4" />
+
+        <h5>Education, experience and certificates</h5>
+
+        <p class="text-muted small">
+            Open your resume details to manage your education,
+            experience, certificates, projects and activities.
+            Your profile changes will be saved first.
+        </p>
+
+        <button type="submit"
+                name="next"
+                value="resumeDetails"
+                class="btn btn-pill btn-mint-outline">
+            Manage Education / Experience / Certificates
+        </button>
     </form>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

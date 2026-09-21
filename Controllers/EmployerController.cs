@@ -569,65 +569,48 @@ namespace AI_powerd_job_search_management_system.Controllers
 
         // BRANCH DETAILS: owner can manage; staff can only view assigned branch
         [HttpGet]
-        public async Task<IActionResult> BranchDetails(int id)
-        {
-            var employer = await GetCurrentEmployerAsync();
+public async Task<IActionResult> BranchDetails(int id)
+{
+    var employer = await GetCurrentEmployerAsync();
 
-            if (employer == null)
-                return RedirectToAction("CompleteProfile");
+    if (employer == null)
+        return RedirectToAction("CompleteProfile");
 
-            bool isOwner = employer.Position == EmployerPosition.Owner;
+    bool isOwner = employer.Position == EmployerPosition.Owner;
 
-            if (!isOwner && employer.BranchId != id)
-                return Forbid();
+    // Employees can only view their assigned branch.
+    if (!isOwner && employer.BranchId != id)
+        return Forbid();
 
-            var branch = await _context.Branches
-                .Include(b => b.Company)
-                .FirstOrDefaultAsync(b =>
-                    b.Id == id &&
-                    b.CompanyId == employer.CompanyId);
+    // Owners and employees can only access their own company.
+    var branch = await _context.Branches
+        .AsNoTracking()
+        .Include(b => b.Company)
+        .FirstOrDefaultAsync(b =>
+            b.Id == id &&
+            b.CompanyId == employer.CompanyId);
 
-            if (branch == null)
-                return NotFound();
+    if (branch == null)
+        return NotFound();
 
-            var approvedStaff = await _context.Employers
-                .Include(e => e.ApplicationUser)
-                .Where(e =>
-                    e.BranchId == id &&
-                    e.CompanyId == employer.CompanyId &&
-                    e.Position != EmployerPosition.Owner &&
-                    e.IsApprovedByOwner)
-                .OrderBy(e => e.ApplicationUser!.FullName)
-                .ToListAsync();
+    var jobs = await _context.Jobs
+        .AsNoTracking()
+        .Include(j => j.Employer)
+            .ThenInclude(e => e!.ApplicationUser)
+        .Where(j =>
+            j.BranchId == branch.Id &&
+            j.Employer!.CompanyId == employer.CompanyId)
+        .OrderByDescending(j => j.PostedAt)
+        .ToListAsync();
 
-            var pendingStaff = isOwner
-                ? await _context.Employers
-                    .Include(e => e.ApplicationUser)
-                    .Where(e =>
-                        e.BranchId == id &&
-                        e.CompanyId == employer.CompanyId &&
-                        e.Position != EmployerPosition.Owner &&
-                        !e.IsApprovedByOwner)
-                    .OrderBy(e => e.CreatedAt)
-                    .ToListAsync()
-                : new List<Employer>();
+    ViewBag.Jobs = jobs;
 
-            var jobs = await _context.Jobs
-                .Include(j => j.Employer)
-                    .ThenInclude(e => e!.ApplicationUser)
-                .Where(j =>
-                    j.BranchId == id &&
-                    j.Employer!.CompanyId == employer.CompanyId)
-                .OrderByDescending(j => j.PostedAt)
-                .ToListAsync();
+    ViewBag.CanPostJob =
+        branch.Company?.IsApproved == true &&
+        (isOwner || employer.IsApprovedByOwner);
 
-            ViewBag.ApprovedStaff = approvedStaff;
-            ViewBag.PendingStaff = pendingStaff;
-            ViewBag.Jobs = jobs;
-            ViewBag.IsOwner = isOwner;
-
-            return View(branch);
-        }
+    return View(branch);
+}
 
         [HttpGet]
         public async Task<IActionResult> CreateBranch()
