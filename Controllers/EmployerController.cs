@@ -24,7 +24,9 @@ namespace AI_powerd_job_search_management_system.Controllers
             _userManager = userManager;
         }
 
+
         // EMPLOYER DASHBOARD & job listings
+
 
         public async Task<IActionResult> Index(string? search, string? status)
         {
