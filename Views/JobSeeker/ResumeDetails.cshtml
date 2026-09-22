@@ -1,19 +1,32 @@
 ﻿@using AI_powerd_job_search_management_system.Models
 
 @{
-    ViewData["Title"] = "Resume Details";
+    ViewData["Title"] = "Education & Experience";
 
     var resume = (Resume)ViewBag.Resume;
-    var educations = (List<Education>)ViewBag.Educations;
-    var experiences = (List<Experience>)ViewBag.Experiences;
-    var certifications = (List<Certification>)ViewBag.Certifications;
-    var projects = (List<Project>)ViewBag.Projects;
-    var activities = (List<ExtracurricularActivity>)ViewBag.Activities;
+
+    var educations = ViewBag.Educations as List<Education>
+        ?? new List<Education>();
+
+    var experiences = ViewBag.Experiences as List<Experience>
+        ?? new List<Experience>();
+
+    var certifications = ViewBag.Certifications as List<Certification>
+        ?? new List<Certification>();
+
+    var projects = ViewBag.Projects as List<Project>
+        ?? new List<Project>();
+
+    var activities = ViewBag.Activities as List<ExtracurricularActivity>
+        ?? new List<ExtracurricularActivity>();
 }
 
 <div class="page-header">
-    <h2>Resume Details</h2>
-    <p>@resume.OriginalFileName</p>
+    <h2>Education & Experience</h2>
+    <p>
+        Manage your education, experience, certifications,
+        projects and extracurricular activities.
+    </p>
 </div>
 
 @if (TempData["ResumeError"] is string error)
@@ -23,167 +36,275 @@
     </div>
 }
 
+@if (TempData["ResumeSuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">
+        @success
+    </div>
+}
+
+<div asp-validation-summary="All"
+     class="text-danger mb-3"
+     role="alert"></div>
+
+<p class="text-muted small mb-4">
+    Save each entry using its Add or Update button before continuing.
+</p>
+
 <!-- EDUCATION -->
 <div class="card-clean mb-4">
-    <h5 class="mb-3">Education</h5>
+    <h4 class="mb-3">Education</h4>
 
     @if (!educations.Any())
     {
-        <p class="text-muted small">No education details added yet.</p>
+        <p class="text-muted">No education details added yet.</p>
     }
 
-    @foreach (var education in educations.OrderByDescending(e => e.StartDate))
+    @foreach (var education in educations)
     {
-        <div class="d-flex justify-content-between align-items-start
-                        gap-3 border-bottom py-3">
-            <div>
-                <strong>@education.Institution</strong>
+        <div class="border rounded p-3 mb-3">
+            <form asp-controller="JobSeeker"
+                  asp-action="UpdateEducation"
+                  method="post"
+                  class="row g-3 resume-date-form">
 
-                <div>
-                    @education.Degree
-
-                    @if (!string.IsNullOrWhiteSpace(education.FieldOfStudy))
-                    {
-                        <span> — @education.FieldOfStudy</span>
-                    }
-            </div>
-
-            <div class="text-muted small mt-1">
-                Start:
-                @(education.StartDate?.ToString("MMM yyyy")
-                                ?? "Not provided")
-                                                  <br />
-                                                  End / Expected Graduation:
-                @(education.EndDate?.ToString("MMM yyyy")
-                                ?? "Ongoing / not provided")
-            </div>
-        </div>
-
-            <form asp-action="DeleteEducation" method="post">
                 <input type="hidden" name="id" value="@education.Id" />
                 <input type="hidden" name="resumeId" value="@resume.Id" />
 
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Institution
+                        <input name="institution"
+                               value="@education.Institution"
+                               class="form-control mt-1"
+                               maxlength="200"
+                               required />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Degree
+                        <input name="degree"
+                               value="@education.Degree"
+                               class="form-control mt-1"
+                               maxlength="150" />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Field of study
+                        <input name="fieldOfStudy"
+                               value="@education.FieldOfStudy"
+                               class="form-control mt-1"
+                               maxlength="150" />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Start date
+                        <input type="date"
+                               name="startDate"
+                               value="@(education.StartDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control mt-1" />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        End / Expected graduation date
+                        <input type="date"
+                               name="endDate"
+                               value="@(education.EndDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control mt-1" />
+                    </label>
+                    <small class="text-muted">
+                        Leave blank if ongoing and the completion date is unknown.
+                    </small>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit"
+                            class="btn btn-pill btn-ink btn-sm">
+                        Update Education
+                    </button>
+                </div>
+            </form>
+
+            <form asp-action="DeleteEducation"
+                  method="post"
+                  class="mt-2"
+                  onsubmit="return confirm('Remove this education entry?');">
+                <input type="hidden" name="id" value="@education.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
                 <button type="submit"
                         class="btn btn-pill btn-ghost btn-sm text-danger">
                     Remove
                 </button>
             </form>
         </div>
-        }
+    }
 
-    <form asp-action="AddEducation"
-          method="post"
-          class="row g-3 mt-2 resume-date-form">
+    <details class="mt-3" open="@(!educations.Any())">
+        <summary class="fw-semibold">+ Add education</summary>
 
-        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <form asp-action="AddEducation"
+              method="post"
+              class="row g-3 mt-2 resume-date-form">
 
-        <div class="col-md-6">
-            <label for="educationInstitution" class="form-label">
-                Institution
-            </label>
-            <input id="educationInstitution"
-                   name="institution"
-                   class="form-control"
-                   placeholder="School, college or university"
-                   maxlength="200"
-                   required />
-        </div>
+            <input type="hidden" name="resumeId" value="@resume.Id" />
 
-        <div class="col-md-6">
-            <label for="educationDegree" class="form-label">
-                Degree
-            </label>
-            <input id="educationDegree"
-                   name="degree"
-                   class="form-control"
-                   placeholder="e.g. BSc"
-                   maxlength="150" />
-        </div>
-
-        <div class="col-md-4">
-            <label for="educationField" class="form-label">
-                Field of Study
-            </label>
-            <input id="educationField"
-                   name="fieldOfStudy"
-                   class="form-control"
-                   placeholder="e.g. Computer Science"
-                   maxlength="150" />
-        </div>
-
-        <div class="col-md-4">
-            <label for="educationStart" class="form-label">
-                Start Date
-            </label>
-            <input id="educationStart"
-                   type="date"
-                   name="startDate"
-                   class="form-control" />
-        </div>
-
-        <div class="col-md-4">
-            <label for="educationEnd" class="form-label">
-                End / Expected Graduation Date
-            </label>
-            <input id="educationEnd"
-                   type="date"
-                   name="endDate"
-                   class="form-control" />
-
-            <div class="form-text">
-                Leave blank if ongoing and the completion date is unknown.
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Institution
+                    <input name="institution"
+                           class="form-control mt-1"
+                           placeholder="School, college or university"
+                           maxlength="200"
+                           required />
+                </label>
             </div>
-        </div>
 
-        <div class="col-12">
-            <button type="submit"
-                    class="btn btn-pill btn-mint-outline btn-sm">
-                + Add Education
-            </button>
-        </div>
-    </form>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Degree
+                    <input name="degree"
+                           class="form-control mt-1"
+                           placeholder="e.g. BSc"
+                           maxlength="150" />
+                </label>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Field of study
+                    <input name="fieldOfStudy"
+                           class="form-control mt-1"
+                           placeholder="e.g. Computer Science"
+                           maxlength="150" />
+                </label>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Start date
+                    <input type="date"
+                           name="startDate"
+                           class="form-control mt-1" />
+                </label>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    End / Expected graduation date
+                    <input type="date"
+                           name="endDate"
+                           class="form-control mt-1" />
+                </label>
+                <small class="text-muted">
+                    Leave blank if ongoing and the completion date is unknown.
+                </small>
+            </div>
+
+            <div class="col-12">
+                <button type="submit"
+                        class="btn btn-pill btn-mint-outline btn-sm">
+                    Add Education
+                </button>
+            </div>
+        </form>
+    </details>
 </div>
 
 <!-- EXPERIENCE -->
 <div class="card-clean mb-4">
-    <h5 class="mb-3">Experience</h5>
+    <h4 class="mb-3">Experience</h4>
 
     @if (!experiences.Any())
     {
-        <p class="text-muted small">No experience details added yet.</p>
+        <p class="text-muted">No experience details added yet.</p>
     }
 
-    @foreach (var experience in experiences.OrderByDescending(e => e.StartDate))
+    @foreach (var experience in experiences)
     {
-        <div class="d-flex justify-content-between align-items-start
-                        gap-3 border-bottom py-3">
-            <div>
-                <strong>@experience.JobTitle</strong>
-                <div>@experience.CompanyName</div>
+        <div class="border rounded p-3 mb-3">
+            <form asp-action="UpdateExperience"
+                  method="post"
+                  class="row g-3 resume-date-form">
 
-                <div class="text-muted small mt-1">
-                    Start:
-                    @(experience.StartDate?.ToString("MMM yyyy")
-                                    ?? "Not provided")
-                                                      <br />
-                                                      End:
-                    @(experience.EndDate?.ToString("MMM yyyy")
-                                    ?? "Present / not provided")
-            </div>
-
-            @if (!string.IsNullOrWhiteSpace(experience.Description))
-                {
-                    <div class="small mt-2"
-                         style="white-space: pre-line;">
-                        @experience.Description
-                    </div>
-                }
-            </div>
-
-            <form asp-action="DeleteExperience" method="post">
                 <input type="hidden" name="id" value="@experience.Id" />
                 <input type="hidden" name="resumeId" value="@resume.Id" />
 
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Company
+                        <input name="companyName"
+                               value="@experience.CompanyName"
+                               class="form-control mt-1"
+                               maxlength="150"
+                               required />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Job title
+                        <input name="jobTitle"
+                               value="@experience.JobTitle"
+                               class="form-control mt-1"
+                               maxlength="150"
+                               required />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Start date
+                        <input type="date"
+                               name="startDate"
+                               value="@(experience.StartDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control mt-1" />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        End date
+                        <input type="date"
+                               name="endDate"
+                               value="@(experience.EndDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control mt-1" />
+                    </label>
+                    <small class="text-muted">
+                        Leave blank if you currently work here.
+                    </small>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label d-block">
+                        Description
+                        <textarea name="description"
+                              class="form-control mt-1"
+                              rows="3">@experience.Description</textarea>
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit"
+                            class="btn btn-pill btn-ink btn-sm">
+                        Update Experience
+                    </button>
+                </div>
+            </form>
+
+            <form asp-action="DeleteExperience"
+                  method="post"
+                  class="mt-2"
+                  onsubmit="return confirm('Remove this experience entry?');">
+                <input type="hidden" name="id" value="@experience.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
                 <button type="submit"
                         class="btn btn-pill btn-ghost btn-sm text-danger">
                     Remove
@@ -192,198 +313,256 @@
         </div>
     }
 
-    <form asp-action="AddExperience"
-          method="post"
-          class="row g-3 mt-2 resume-date-form">
+    <details class="mt-3" open="@(!experiences.Any())">
+        <summary class="fw-semibold">+ Add experience</summary>
 
-        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <form asp-action="AddExperience"
+              method="post"
+              class="row g-3 mt-2 resume-date-form">
 
-        <div class="col-md-6">
-            <label for="experienceCompany" class="form-label">
-                Company
-            </label>
-            <input id="experienceCompany"
-                   name="companyName"
-                   class="form-control"
-                   placeholder="Company name"
-                   maxlength="150"
-                   required />
-        </div>
+            <input type="hidden" name="resumeId" value="@resume.Id" />
 
-        <div class="col-md-6">
-            <label for="experienceTitle" class="form-label">
-                Job Title
-            </label>
-            <input id="experienceTitle"
-                   name="jobTitle"
-                   class="form-control"
-                   placeholder="e.g. Software Development Intern"
-                   maxlength="150"
-                   required />
-        </div>
-
-        <div class="col-md-6">
-            <label for="experienceStart" class="form-label">
-                Start Date
-            </label>
-            <input id="experienceStart"
-                   type="date"
-                   name="startDate"
-                   class="form-control" />
-        </div>
-
-        <div class="col-md-6">
-            <label for="experienceEnd" class="form-label">
-                End Date
-            </label>
-            <input id="experienceEnd"
-                   type="date"
-                   name="endDate"
-                   class="form-control" />
-
-            <div class="form-text">
-                Leave blank if you currently work here.
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Company
+                    <input name="companyName"
+                           class="form-control mt-1"
+                           maxlength="150"
+                           required />
+                </label>
             </div>
-        </div>
 
-        <div class="col-12">
-            <label for="experienceDescription" class="form-label">
-                Responsibilities / Description
-            </label>
-            <textarea id="experienceDescription"
-                      name="description"
-                      class="form-control"
-                      rows="3"
-                      placeholder="Describe your responsibilities and achievements"></textarea>
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Job title
+                    <input name="jobTitle"
+                           class="form-control mt-1"
+                           maxlength="150"
+                           required />
+                </label>
+            </div>
 
-        <div class="col-12">
-            <button type="submit"
-                    class="btn btn-pill btn-mint-outline btn-sm">
-                + Add Experience
-            </button>
-        </div>
-    </form>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Start date
+                    <input type="date"
+                           name="startDate"
+                           class="form-control mt-1" />
+                </label>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    End date
+                    <input type="date"
+                           name="endDate"
+                           class="form-control mt-1" />
+                </label>
+                <small class="text-muted">
+                    Leave blank if you currently work here.
+                </small>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label d-block">
+                    Description
+                    <textarea name="description"
+                              class="form-control mt-1"
+                              rows="3"></textarea>
+                </label>
+            </div>
+
+            <div class="col-12">
+                <button type="submit"
+                        class="btn btn-pill btn-mint-outline btn-sm">
+                    Add Experience
+                </button>
+            </div>
+        </form>
+    </details>
 </div>
 
 <!-- CERTIFICATIONS -->
 <div class="card-clean mb-4">
-    <h5 class="mb-3">Certifications</h5>
+    <h4 class="mb-3">Certifications</h4>
 
     @if (!certifications.Any())
     {
-        <p class="text-muted small">No certifications added yet.</p>
+        <p class="text-muted">No certifications added yet.</p>
     }
 
-    @foreach (var certificate in certifications.OrderByDescending(c => c.DateIssued))
+    @foreach (var certificate in certifications)
     {
-        <div class="d-flex justify-content-between align-items-start
-                        gap-3 border-bottom py-3">
-            <div>
-                <strong>@certificate.Name</strong>
-                <div>@certificate.IssuingOrganization</div>
+        <div class="border rounded p-3 mb-3">
+            <form asp-action="UpdateCertification"
+                  method="post"
+                  class="row g-3">
 
-                <div class="text-muted small mt-1">
-                    Issue Date:
-                    @(certificate.DateIssued?.ToString("MMM yyyy")
-                                    ?? "Not provided")
-            </div>
-        </div>
-
-            <form asp-action="DeleteCertification" method="post">
                 <input type="hidden" name="id" value="@certificate.Id" />
                 <input type="hidden" name="resumeId" value="@resume.Id" />
 
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Certification name
+                        <input name="name"
+                               value="@certificate.Name"
+                               class="form-control mt-1"
+                               maxlength="200"
+                               required />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Issuing organization
+                        <input name="issuingOrganization"
+                               value="@certificate.IssuingOrganization"
+                               class="form-control mt-1"
+                               maxlength="200" />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Issue date
+                        <input type="date"
+                               name="dateIssued"
+                               value="@(certificate.DateIssued?.ToString("yyyy-MM-dd"))"
+                               class="form-control mt-1" />
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit"
+                            class="btn btn-pill btn-ink btn-sm">
+                        Update Certification
+                    </button>
+                </div>
+            </form>
+
+            <form asp-action="DeleteCertification"
+                  method="post"
+                  class="mt-2"
+                  onsubmit="return confirm('Remove this certification?');">
+                <input type="hidden" name="id" value="@certificate.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
                 <button type="submit"
                         class="btn btn-pill btn-ghost btn-sm text-danger">
                     Remove
                 </button>
             </form>
         </div>
-        }
+    }
 
-    <form asp-action="AddCertification"
-          method="post"
-          class="row g-3 mt-2">
+    <details class="mt-3" open="@(!certifications.Any())">
+        <summary class="fw-semibold">+ Add certification</summary>
 
-        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <form asp-action="AddCertification"
+              method="post"
+              class="row g-3 mt-2">
 
-        <div class="col-md-4">
-            <label for="certificationName" class="form-label">
-                Certification Name
-            </label>
-            <input id="certificationName"
-                   name="name"
-                   class="form-control"
-                   maxlength="200"
-                   required />
-        </div>
+            <input type="hidden" name="resumeId" value="@resume.Id" />
 
-        <div class="col-md-4">
-            <label for="certificationOrganization" class="form-label">
-                Issuing Organization
-            </label>
-            <input id="certificationOrganization"
-                   name="issuingOrganization"
-                   class="form-control"
-                   maxlength="200" />
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Certification name
+                    <input name="name"
+                           class="form-control mt-1"
+                           maxlength="200"
+                           required />
+                </label>
+            </div>
 
-        <div class="col-md-4">
-            <label for="certificationDate" class="form-label">
-                Issue Date
-            </label>
-            <input id="certificationDate"
-                   type="date"
-                   name="dateIssued"
-                   class="form-control" />
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Issuing organization
+                    <input name="issuingOrganization"
+                           class="form-control mt-1"
+                           maxlength="200" />
+                </label>
+            </div>
 
-        <div class="col-12">
-            <button type="submit"
-                    class="btn btn-pill btn-mint-outline btn-sm">
-                + Add Certification
-            </button>
-        </div>
-    </form>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Issue date
+                    <input type="date"
+                           name="dateIssued"
+                           class="form-control mt-1" />
+                </label>
+            </div>
+
+            <div class="col-12">
+                <button type="submit"
+                        class="btn btn-pill btn-mint-outline btn-sm">
+                    Add Certification
+                </button>
+            </div>
+        </form>
+    </details>
 </div>
 
 <!-- PROJECTS -->
 <div class="card-clean mb-4">
-    <h5 class="mb-3">Projects</h5>
+    <h4 class="mb-3">Projects</h4>
 
     @if (!projects.Any())
     {
-        <p class="text-muted small">No projects added yet.</p>
+        <p class="text-muted">No projects added yet.</p>
     }
 
     @foreach (var project in projects)
     {
-        <div class="d-flex justify-content-between align-items-start
-                        gap-3 border-bottom py-3">
-            <div>
-                <strong>@project.Title</strong>
+        <div class="border rounded p-3 mb-3">
+            <form asp-action="UpdateProject"
+                  method="post"
+                  class="row g-3">
 
-                @if (!string.IsNullOrWhiteSpace(project.TechnologiesUsed))
-                {
-                    <div class="small text-muted mt-1">
-                        Technologies: @project.TechnologiesUsed
-                    </div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(project.Description))
-                {
-                    <div class="small mt-2"
-                         style="white-space: pre-line;">
-                        @project.Description
-                    </div>
-                }
-            </div>
-
-            <form asp-action="DeleteProject" method="post">
                 <input type="hidden" name="id" value="@project.Id" />
                 <input type="hidden" name="resumeId" value="@resume.Id" />
 
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Project title
+                        <input name="title"
+                               value="@project.Title"
+                               class="form-control mt-1"
+                               maxlength="200"
+                               required />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Technologies used
+                        <input name="technologiesUsed"
+                               value="@project.TechnologiesUsed"
+                               class="form-control mt-1" />
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label d-block">
+                        Description
+                        <textarea name="description"
+                              class="form-control mt-1"
+                              rows="3">@project.Description</textarea>
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit"
+                            class="btn btn-pill btn-ink btn-sm">
+                        Update Project
+                    </button>
+                </div>
+            </form>
+
+            <form asp-action="DeleteProject"
+                  method="post"
+                  class="mt-2"
+                  onsubmit="return confirm('Remove this project?');">
+                <input type="hidden" name="id" value="@project.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
                 <button type="submit"
                         class="btn btn-pill btn-ghost btn-sm text-danger">
                     Remove
@@ -392,82 +571,114 @@
         </div>
     }
 
-    <form asp-action="AddProject"
-          method="post"
-          class="row g-3 mt-2">
+    <details class="mt-3" open="@(!projects.Any())">
+        <summary class="fw-semibold">+ Add project</summary>
 
-        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <form asp-action="AddProject"
+              method="post"
+              class="row g-3 mt-2">
 
-        <div class="col-md-6">
-            <label for="projectTitle" class="form-label">
-                Project Title
-            </label>
-            <input id="projectTitle"
-                   name="title"
-                   class="form-control"
-                   maxlength="200"
-                   required />
-        </div>
+            <input type="hidden" name="resumeId" value="@resume.Id" />
 
-        <div class="col-md-6">
-            <label for="projectTechnologies" class="form-label">
-                Technologies Used
-            </label>
-            <input id="projectTechnologies"
-                   name="technologiesUsed"
-                   class="form-control"
-                   placeholder="e.g. ASP.NET Core, SQL Server" />
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Project title
+                    <input name="title"
+                           class="form-control mt-1"
+                           maxlength="200"
+                           required />
+                </label>
+            </div>
 
-        <div class="col-12">
-            <label for="projectDescription" class="form-label">
-                Description
-            </label>
-            <textarea id="projectDescription"
-                      name="description"
-                      class="form-control"
-                      rows="3"></textarea>
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Technologies used
+                    <input name="technologiesUsed"
+                           class="form-control mt-1" />
+                </label>
+            </div>
 
-        <div class="col-12">
-            <button type="submit"
-                    class="btn btn-pill btn-mint-outline btn-sm">
-                + Add Project
-            </button>
-        </div>
-    </form>
+            <div class="col-12">
+                <label class="form-label d-block">
+                    Description
+                    <textarea name="description"
+                              class="form-control mt-1"
+                              rows="3"></textarea>
+                </label>
+            </div>
+
+            <div class="col-12">
+                <button type="submit"
+                        class="btn btn-pill btn-mint-outline btn-sm">
+                    Add Project
+                </button>
+            </div>
+        </form>
+    </details>
 </div>
 
 <!-- EXTRACURRICULAR ACTIVITIES -->
 <div class="card-clean mb-4">
-    <h5 class="mb-3">Extracurricular Activities</h5>
+    <h4 class="mb-3">Extracurricular Activities</h4>
 
     @if (!activities.Any())
     {
-        <p class="text-muted small">No activities added yet.</p>
+        <p class="text-muted">No activities added yet.</p>
     }
 
     @foreach (var activity in activities)
     {
-        <div class="d-flex justify-content-between align-items-start
-                        gap-3 border-bottom py-3">
-            <div>
-                <strong>@activity.ActivityName</strong>
-                <div class="small text-muted">@activity.RoleOrPosition</div>
+        <div class="border rounded p-3 mb-3">
+            <form asp-action="UpdateActivity"
+                  method="post"
+                  class="row g-3">
 
-                @if (!string.IsNullOrWhiteSpace(activity.Description))
-                {
-                    <div class="small mt-2"
-                         style="white-space: pre-line;">
-                        @activity.Description
-                    </div>
-                }
-            </div>
-
-            <form asp-action="DeleteActivity" method="post">
                 <input type="hidden" name="id" value="@activity.Id" />
                 <input type="hidden" name="resumeId" value="@resume.Id" />
 
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Activity name
+                        <input name="activityName"
+                               value="@activity.ActivityName"
+                               class="form-control mt-1"
+                               maxlength="200"
+                               required />
+                    </label>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block">
+                        Role / Position
+                        <input name="roleOrPosition"
+                               value="@activity.RoleOrPosition"
+                               class="form-control mt-1" />
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label d-block">
+                        Description
+                        <textarea name="description"
+                              class="form-control mt-1"
+                              rows="3">@activity.Description</textarea>
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit"
+                            class="btn btn-pill btn-ink btn-sm">
+                        Update Activity
+                    </button>
+                </div>
+            </form>
+
+            <form asp-action="DeleteActivity"
+                  method="post"
+                  class="mt-2"
+                  onsubmit="return confirm('Remove this activity?');">
+                <input type="hidden" name="id" value="@activity.Id" />
+                <input type="hidden" name="resumeId" value="@resume.Id" />
                 <button type="submit"
                         class="btn btn-pill btn-ghost btn-sm text-danger">
                     Remove
@@ -476,107 +687,141 @@
         </div>
     }
 
-    <form asp-action="AddActivity"
-          method="post"
-          class="row g-3 mt-2">
+    <details class="mt-3" open="@(!activities.Any())">
+        <summary class="fw-semibold">+ Add activity</summary>
 
-        <input type="hidden" name="resumeId" value="@resume.Id" />
+        <form asp-action="AddActivity"
+              method="post"
+              class="row g-3 mt-2">
 
-        <div class="col-md-6">
-            <label for="activityName" class="form-label">
-                Activity Name
-            </label>
-            <input id="activityName"
-                   name="activityName"
-                   class="form-control"
-                   maxlength="200"
-                   required />
-        </div>
+            <input type="hidden" name="resumeId" value="@resume.Id" />
 
-        <div class="col-md-6">
-            <label for="activityRole" class="form-label">
-                Role / Position
-            </label>
-            <input id="activityRole"
-                   name="roleOrPosition"
-                   class="form-control"
-                   placeholder="e.g. Member, Volunteer, Coordinator" />
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Activity name
+                    <input name="activityName"
+                           class="form-control mt-1"
+                           maxlength="200"
+                           required />
+                </label>
+            </div>
 
-        <div class="col-12">
-            <label for="activityDescription" class="form-label">
-                Description
-            </label>
-            <textarea id="activityDescription"
-                      name="description"
-                      class="form-control"
-                      rows="3"></textarea>
-        </div>
+            <div class="col-md-6">
+                <label class="form-label d-block">
+                    Role / Position
+                    <input name="roleOrPosition"
+                           class="form-control mt-1" />
+                </label>
+            </div>
 
-        <div class="col-12">
-            <button type="submit"
-                    class="btn btn-pill btn-mint-outline btn-sm">
-                + Add Activity
-            </button>
-        </div>
-    </form>
+            <div class="col-12">
+                <label class="form-label d-block">
+                    Description
+                    <textarea name="description"
+                              class="form-control mt-1"
+                              rows="3"></textarea>
+                </label>
+            </div>
+
+            <div class="col-12">
+                <button type="submit"
+                        class="btn btn-pill btn-mint-outline btn-sm">
+                    Add Activity
+                </button>
+            </div>
+        </form>
+    </details>
 </div>
 
-<div class="d-flex flex-wrap gap-2 mt-4">
+<!-- CONTINUE AFTER SAVING -->
+<div class="d-flex flex-wrap gap-2 mb-4">
     <a asp-controller="JobSeeker"
-       asp-action="Profile"
+       asp-action="FinishResumeDetails"
+       asp-route-resumeId="@resume.Id"
        class="btn btn-pill btn-ink">
-        Save 
+        Done — Continue
     </a>
 
     <a asp-controller="JobSeeker"
        asp-action="EditProfile"
-       class="btn btn-pill btn-mint-outline">
+       class="btn btn-pill btn-ghost">
         Back to edit profile
-    </a>
-
-    <a asp-controller="JobSeeker"
-       asp-action="MyResumes"
-       class="btn btn-ghost">
-        My resumes
     </a>
 </div>
 
 <script>
-    document.querySelectorAll(".resume-date-form").forEach(form => {
-        const start = form.querySelector('[name="startDate"]');
-        const end = form.querySelector('[name="endDate"]');
+    (() => {
+        // Validate education and experience date ranges.
+        document.querySelectorAll(".resume-date-form").forEach(form => {
+            const start = form.querySelector('[name="startDate"]');
+            const end = form.querySelector('[name="endDate"]');
 
-        function validateDates() {
-            end.min = start.value || "";
+            if (!start || !end) return;
 
-            const invalid =
-                start.value &&
-                end.value &&
-                end.value < start.value;
+            function validateDates() {
+                end.min = start.value || "";
 
-            end.setCustomValidity(
-                invalid
-                    ? "End date cannot be earlier than start date."
-                    : ""
-            );
-        }
+                const invalid =
+                    start.value &&
+                    end.value &&
+                    end.value < start.value;
 
-        start.addEventListener("input", validateDates);
-        start.addEventListener("change", validateDates);
-
-        end.addEventListener("input", validateDates);
-        end.addEventListener("change", validateDates);
-
-        form.addEventListener("submit", event => {
-            validateDates();
-
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                form.reportValidity();
+                end.setCustomValidity(
+                    invalid
+                        ? "End date cannot be earlier than start date."
+                        : ""
+                );
             }
+
+            start.addEventListener("input", validateDates);
+            start.addEventListener("change", validateDates);
+            end.addEventListener("input", validateDates);
+            end.addEventListener("change", validateDates);
+
+            form.addEventListener("submit", event => {
+                validateDates();
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    form.reportValidity();
+                }
+            });
+
+            validateDates();
         });
 
-        validateDates();
-    });
+        // Warn before leaving changes that have not been saved.
+        const dirtyForms = new Set();
+        let submitting = false;
+
+        document.querySelectorAll('form[method="post"]').forEach(form => {
+            form.addEventListener("input", () => dirtyForms.add(form));
+            form.addEventListener("change", () => dirtyForms.add(form));
+
+            form.addEventListener("submit", event => {
+                if (event.defaultPrevented) return;
+
+                const otherUnsavedForms =
+                    [...dirtyForms].some(other => other !== form);
+
+                if (otherUnsavedForms &&
+                    !confirm(
+                        "Other sections have unsaved changes. " +
+                        "Continue without saving those changes?"
+                    )) {
+                    event.preventDefault();
+                    return;
+                }
+
+                submitting = true;
+            });
+        });
+
+        window.addEventListener("beforeunload", event => {
+            if (dirtyForms.size > 0 && !submitting) {
+                event.preventDefault();
+                event.returnValue = "";
+            }
+        });
+    })();
 </script>
